@@ -48,7 +48,7 @@ class LabelGenerator:
         self.has_barcode = has_barcode
         self.add_name = add_name
         self.output_dir = None
-        self.output_name = "out"
+        self.output_name = f"barcodes_{self.study.study_name}"
         self.layout = None
         self.barcode_paths = None
         self.barcodes = None
