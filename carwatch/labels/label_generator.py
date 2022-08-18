@@ -6,13 +6,14 @@ import barcode
 import cairosvg
 import numpy as np
 
-from carwatch.labels.utils import _assert_is_dir, _tex_to_pdf, Study
 from carwatch.labels.print_layout import AveryZweckformJ4791Layout, PrintLayout
+from carwatch.labels.utils import Study, _assert_is_dir, _tex_to_pdf
 
 
 class LabelGenerator:
     """Class that is used to generate printable *.pdf files with labels for all saliva samples taken within a study."""
-    EAN8 = barcode.get_barcode_class('ean8')
+
+    EAN8 = barcode.get_barcode_class("ean8")
 
     def __init__(self, study: Study, has_barcode: bool = False, add_name: bool = False):
         """Class that is used to generate printable *.pdf files with labels for all saliva samples taken within a study.
@@ -54,8 +55,13 @@ class LabelGenerator:
         self.barcodes = None
         self.barcode_ids = None
 
-    def generate(self, output_dir: str = ".", output_name: Union[str, None] = None,
-                 layout: PrintLayout = AveryZweckformJ4791Layout(), debug=False):
+    def generate(
+        self,
+        output_dir: str = ".",
+        output_name: Union[str, None] = None,
+        layout: PrintLayout = AveryZweckformJ4791Layout(),
+        debug=False,
+    ):
         """
         Generates a *.pdf file with labels according to the LabelGenerator's properties
         Parameters
@@ -90,8 +96,10 @@ class LabelGenerator:
             1-dim array containing :class: barcode.ean.EuropeanArticleNumber8 objects that represent the EAN8-barcodes
             corresponding to `barcode_ids`
         """
-        barcode_ids = ["{:03d}{:02d}{:02d}".format(subj, day, saliv) for subj, day, saliv in
-                       list(product(self.study.subject_ids, self.study.day_ids, self.study.saliva_ids))]
+        barcode_ids = [
+            "{:03d}{:02d}{:02d}".format(subj, day, saliv)
+            for subj, day, saliv in list(product(self.study.subject_ids, self.study.day_ids, self.study.saliva_ids))
+        ]
         # sort the ids
         barcode_ids = np.array(sorted(barcode_ids))
         # generate the codes
@@ -104,12 +112,13 @@ class LabelGenerator:
         img_path = self.output_dir.joinpath("img")
         options = {"quiet_zone": 1, "font_size": 8, "text_distance": 3}  # configure label font
         barcode_paths = np.array(
-            [barcode_object.save(img_path.joinpath('barcode_{}'.format(barcode_id)), options=options) for
-             barcode_id, barcode_object in
-             zip(self.barcode_ids, self.barcodes)])
+            [
+                barcode_object.save(img_path.joinpath("barcode_{}".format(barcode_id)), options=options)
+                for barcode_id, barcode_object in zip(self.barcode_ids, self.barcodes)
+            ]
+        )
         for path in barcode_paths:
-            cairosvg.svg2pdf(
-                file_obj=open(path, "rb"), write_to=path.replace('svg', 'pdf'))
+            cairosvg.svg2pdf(file_obj=open(path, "rb"), write_to=path.replace("svg", "pdf"))
         return barcode_paths
 
     def _create_output_dir(self):
@@ -123,18 +132,20 @@ class LabelGenerator:
         and the `img`-folder itself if `delete_img_dir` is True"""
         img_path = self.output_dir.joinpath("img")
         for f in img_path.glob("*"):
-            if f.suffix in ('.svg', '.pdf'):
+            if f.suffix in (".svg", ".pdf"):
                 f.unlink()
         if delete_img_dir:
             img_path.rmdir()
         if not debug:
             for f in self.output_dir.glob("*"):
-                if f.suffix in ('.log', '.aux', '.tex'):
+                if f.suffix in (".log", ".aux", ".tex"):
                     f.unlink()
 
     def _generate_tex_file(self):
         import importlib.resources as pkg_resources
+
         from carwatch import labels  # package containing tex template
+
         # copy tex template to output dir
         template = pkg_resources.read_text(labels, "barcode_template.tex")
         with open(self.output_dir.joinpath(self.output_name + ".tex"), "w+") as fp:
@@ -171,7 +182,9 @@ class LabelGenerator:
             # add study name, subject id, day, and sample to second column
             if self.has_barcode:
                 # insert infos as one row in the second column
-                table_content += rf"\centering{font_size}{{{self.study.study_name}\_{subject:02d}\newline T{day}\_S{sample}}}" + "\n"
+                table_content += (
+                    rf"\centering{font_size}{{{self.study.study_name}\_{subject:02d}\newline T{day}\_S{sample}}}" + "\n"
+                )
             else:
                 # insert infos centered in two rows
                 table_content += rf"{font_size}{{{self.study.study_name}\_{subject:02d}}}\\{{T{day}\_S{sample}}}" + "\n"
