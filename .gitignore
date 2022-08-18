@@ -6,6 +6,9 @@
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
 
+playground/
+carwatch/output_labels
+
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
