@@ -7,12 +7,12 @@ class Study:
     """Class that represents a study."""
 
     def __init__(
-        self,
-        study_name: str,
-        num_subjects: int,
-        num_days: int,
-        num_saliva_samples: int,
-        has_evening_salivette: bool = False,
+            self,
+            study_name: str,
+            num_subjects: int,
+            num_days: int,
+            num_saliva_samples: int,
+            has_evening_salivette: bool = False,
     ):
         """Class that represents a study.
 
@@ -78,6 +78,17 @@ def _assert_is_dir(path: Path, raise_exception: Optional[bool] = True) -> Option
         return False
 
     return True
+
+
+def _write_to_file(file: Path, content: str):
+    """
+    Write the string `content` to `file`;
+    if `file` doesn't exist create it, otherwisen truncate it
+    """
+    # ensure pathlib
+    file_name = Path(file)
+    with open(file_name, "w+") as fp:
+        fp.write(content)
 
 
 def _tex_to_pdf(output_dir: Path, output_file: str):
