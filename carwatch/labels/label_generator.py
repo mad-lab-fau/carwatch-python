@@ -179,11 +179,15 @@ class LabelGenerator:
         Generates tex-code for a certain label based on specified properties of :class: `LabelGenerator`
         Parameters
         ----------
-        output_dir: str
+        bardcode_id: int
+            8-digit number of the respective barcode with the format `cpppddss`
+            with c: check digit, p: participant id, d: study day, s: saliva sample
         """
+        #
         day = int(barcode_id // 100) % 100
         sample = barcode_id % 100
         subject = int(barcode_id // 1e4)
+        # label is realized with latex table
         label_head = r"\genericlabel" + "\n" + r"\begin{tabular}"
         label_foot = r"\end{tabular}" + "\n\n"
         table_content = ""
@@ -220,6 +224,9 @@ class LabelGenerator:
         return label_tex
 
     def _generate_tex_body(self):
+        """
+        iterate over all barcodes and generate corresponding tex code
+        """
         tex_head = r"\begin{labels}" + "\n"
         tex_foot = r"\end{labels}"
         tex_body = ""
