@@ -1,3 +1,5 @@
+import os
+import subprocess
 from pathlib import Path
 from subprocess import check_call
 from typing import Optional, Union
@@ -120,6 +122,7 @@ def _write_to_file(file: Path, content: str):
     Writes a given text to a file.
     string `content` to `file`;
     if `file` doesn't exist create it, otherwise truncate it
+
     Parameters
     ----------
     file: :class:`~pathlib.Path`
@@ -133,9 +136,30 @@ def _write_to_file(file: Path, content: str):
         fp.write(content)
 
 
-def _tex_to_pdf(output_dir: Path, output_file: str):
-    # TODO: check if pdflatex is installed
-    print(check_call(["pdflatex", f"-output-directory={output_dir}", output_file]))
+def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
+    """Run shell command to compile a tex file to a pdf document
+    
+    Parameters
+    ----------
+    output_dir: path
+        Path to directory where the output file will be stored
+    tex_file: str or :class:`~pathlib.Path`
+        Path to the `*.tex`-file that will be compiled
+        
+    Raises
+    ------
+    RuntimeError
+        if ``pdflatex`` is not found
+    """
+    try:
+        #  call pdflatex and suppress console output
+        check_call(["pdflatex", f"-output-directory={output_dir}", tex_file], stdout=subprocess.DEVNULL)
+    except FileNotFoundError:
+        if os.name.startswith("win"):
+            raise RuntimeError("Apparently you don't have Latex installled. Please install MikTex (from here: https://miktex.org/download), restart your computer, and try again.")
+        else:
+            raise RuntimeError("Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again.")
+    print(f"PDF created succesfully and can be found here: {output_dir.absolute()}")
 
 
 def _assert_file_ending(path: Path, ending: Union[str, list[str]]) -> bool:

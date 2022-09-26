@@ -103,7 +103,10 @@ class LabelGenerator:
         self.barcode_ids, self.barcodes = self._generate_barcodes()
         self.barcode_paths = self._export_barcodes_to_pdf()
         self._generate_tex_file(debug=debug)
-        _tex_to_pdf(self.output_dir, self.output_name + ".tex")
+        try:
+            _tex_to_pdf(self.output_dir, self.output_name + ".tex")
+        except RuntimeError as e:
+            print(e)
         self._clear_intermediate_results(delete_img_dir=True, debug=debug)
 
     def _generate_barcodes(self):
