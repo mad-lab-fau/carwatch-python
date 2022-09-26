@@ -74,7 +74,6 @@ class Study:
             if _assert_file_ending(subject_path, [".csv", ".txt"]):
                 subject_data = pd.read_csv(subject_path)
                 subject_ids = subject_data[subject_column].apply(_sanitize_str_for_tex)
-                print(subject_ids)
                 return subject_ids.to_list()
         else:
             raise ValueError("The path '{}' is not an existing file!".format(subject_path))
@@ -188,6 +187,5 @@ def _sanitize_str_for_tex(string: str) -> str:
     for c in escape_chars:
         string = string.replace(c, rf"\{c}")
     for c in replace_chars.keys():
-        string = string.replace(c, f"{replace_chars[c]}{c}")
-    print(string)
+        string = string.replace(c, f"{replace_chars[c]}")
     return string
