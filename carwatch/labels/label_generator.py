@@ -1,3 +1,4 @@
+import sys
 from itertools import product
 from pathlib import Path
 from typing import Union
@@ -91,7 +92,11 @@ class LabelGenerator:
             furthermore, the borders of each individual label will be drawn in the generated PDF
         """
         output_dir = Path(output_dir)
-        _assert_is_dir(output_dir)
+        try:
+            _assert_is_dir(output_dir)
+        except ValueError as e:
+            print(e)
+            sys.exit(1)
         self.output_dir = output_dir
         if output_name:
             if output_name.endswith(".pdf"):

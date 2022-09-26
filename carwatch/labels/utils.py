@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from pathlib import Path
 from subprocess import check_call
 from typing import Optional, Union
@@ -72,13 +73,14 @@ class Study:
         The length of the subject list, i.e., the number of subjects
         """
         subject_path = Path(subject_path)
-        if subject_path.is_file():
+        try:
             if _assert_file_ending(subject_path, [".csv", ".txt"]):
                 subject_data = pd.read_csv(subject_path)
                 subject_ids = subject_data[subject_column].apply(_sanitize_str_for_tex)
                 return subject_ids.to_list()
-        else:
-            raise ValueError("The path '{}' is not an existing file!".format(subject_path))
+        except ValueError as e:
+            print(e)
+            sys.exit(1)
 
     @property
     def subject_indices(self):
@@ -156,9 +158,11 @@ def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
         check_call(["pdflatex", f"-output-directory={output_dir}", tex_file], stdout=subprocess.DEVNULL)
     except FileNotFoundError:
         if os.name.startswith("win"):
-            raise RuntimeError("Apparently you don't have Latex installled. Please install MikTex (from here: https://miktex.org/download), restart your computer, and try again.")
+            raise RuntimeError(
+                "Apparently you don't have Latex installled. Please install MikTex (from here: https://miktex.org/download), restart your computer, and try again.")
         else:
-            raise RuntimeError("Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again.")
+            raise RuntimeError(
+                "Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again.")
     print(f"PDF created succesfully and can be found here: {output_dir.absolute()}")
 
 
