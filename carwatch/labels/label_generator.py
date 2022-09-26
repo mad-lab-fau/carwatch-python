@@ -17,6 +17,7 @@ class LabelGenerator:
     """
 
     EAN8 = barcode.get_barcode_class("ean8")
+    MAX_NAME_LEN = 12
 
     def __init__(self, study: Study, has_barcode: bool = False, add_name: bool = False):
         """Class that is used to generate printable *.pdf files with labels for all saliva samples taken within a study.
@@ -120,7 +121,8 @@ class LabelGenerator:
         """
         barcode_ids = [
             "{:03d}{:02d}{:02d}".format(subj, day, saliv)
-            for subj, day, saliv in list(product(self.study.subject_ids, self.study.day_ids, self.study.saliva_ids))
+            for subj, day, saliv in
+            list(product(self.study.subject_indices, self.study.day_indices, self.study.saliva_indices))
         ]
         # sort the ids
         barcode_ids = np.array(sorted(barcode_ids))
@@ -203,6 +205,10 @@ class LabelGenerator:
         day = int(barcode_id // 100) % 100
         sample = barcode_id % 100
         subject = int(barcode_id // 1e4)
+        subject_name = f"{subject:02d}"
+        if self.study.subject_ids:
+            # subject has a certain identifier and not just a number
+            subject_name = self.study.subject_ids[subject - 1]
         # label is realized with latex table
         label_head = r"\genericlabel" + "\n" + r"\begin{tabular}"
         label_foot = r"\end{tabular}" + "\n\n"
@@ -221,6 +227,10 @@ class LabelGenerator:
             label_head = r"\genericlabel" + "\n" + r"\begin{center}" + "\n" + r"\begin{tabular}"
             label_foot = r"\end{tabular}" + "\n" + r"\end{center}" + "\n\n"
         if self.add_name:
+            delimiter = "_"
+            if len(self.study.study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
+                # insert linebreak between study name and subject id to prevent overflow
+                delimiter = r"\linebreak "
             if all([sample == self.study.num_saliva_samples, self.study.has_evening_salivette]):
                 # if last sample of the day is evening salivette, it is marked as "TA"
                 sample = "A"
@@ -228,11 +238,11 @@ class LabelGenerator:
             if self.has_barcode:
                 # insert infos as one row in the second column
                 table_content += (
-                        rf"\centering{font_size}{{{self.study.study_name}\_{subject:02d}\newline T{day}\_S{sample}}}" + "\n"
+                        rf"\centering{font_size}{{{self.study.study_name}{delimiter}{subject_name}\newline T{day}\_S{sample}}}" + "\n"
                 )
             else:
                 # insert infos centered in two rows
-                table_content += rf"{font_size}{{{self.study.study_name}\_{subject:02d}}}\\{{T{day}\_S{sample}}}" + "\n"
+                table_content += rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
         else:
             # add day and sample to second column
             table_content += rf"\centering{font_size}{{T{day}\_S{sample}}}" + "\n"

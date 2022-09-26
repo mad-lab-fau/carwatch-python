@@ -1,6 +1,7 @@
 from pathlib import Path
 from subprocess import check_call
-from typing import Optional
+from typing import Optional, Union
+import pandas as pd
 
 
 class Study:
@@ -9,10 +10,13 @@ class Study:
     def __init__(
             self,
             study_name: str,
-            num_subjects: int,
             num_days: int,
             num_saliva_samples: int,
+            num_subjects: Optional[int] = None,
+            subject_path: Optional[Union[str, Path]] = None,
+            subject_column: Optional[str] = "subject",
             has_evening_salivette: bool = False,
+
     ):
         """Class that represents a study.
 
@@ -20,70 +24,109 @@ class Study:
         ----------
         study_name: str
             Study name that will be printed on the labels
-        num_subjects: int
-            Number of subjects in the study
         num_days: int
             Number of days the study will be conducted
         num_saliva_samples: int
             *Total* number of saliva samples per day (including a potential evening sample!)
-        has_evening_salivette: bool
-            Whether a saliva sample in the evening is also collected
+        num_subjects: int, optional
+            Number of subjects in the study
+        subject_path: str or :class:`~pathlib.Path`, optional
+            Path to a tabular list of all subjects
+        subject_column: str, optional
+            Only used when ``subject_path`` is set, specifies the column name containing the subejct ids,
+            default value is ``"subject"``.
+        has_evening_salivette: bool, optional
+            Whether a saliva sample in the evening is also collected, default is ``False``
         """
         self.study_name = study_name
-        self.num_subjects = num_subjects
         self.num_days = num_days
         self.num_saliva_samples = num_saliva_samples
+        if subject_path:
+            self.subject_ids = self._determine_subject_ids(subject_path, subject_column)
+            self.num_subjects = len(self.subject_ids)
+        elif num_subjects:
+            self.num_subjects = num_subjects
+            self.subject_ids = [str(i) for i in range(1, self.num_subjects + 1)]
+        else:
+            raise ValueError(
+                "Subject number unknown! Specification of either `num_subjects` or `subject_data` required!")
+
         self.has_evening_salivette = has_evening_salivette
 
+    def _determine_subject_ids(self, subject_path: Union[str, Path], subject_column: str):
+        """
+        Extract the IDs of the study participants depending on the content of the subject data file.
+        It is assumed that the subject data contains comma-separated tabular data with a header row.
+
+        Parameters
+        ----------
+        study_name: str or :class:`~pathlib.Path`
+            Path to either a `*.csv` or `*.txt` file that contains the tabular participant data,
+            assumes that every row corresponds to one subject
+        subject_column: name of the column that contains the subject ids
+
+        Returns
+        -------
+        The length of the subject list, i.e., the number of subjects
+        """
+        subject_path = Path(subject_path)
+        if subject_path.is_file():
+            if _assert_file_ending(subject_path, [".csv", ".txt"]):
+                subject_data = pd.read_csv(subject_path)
+                subject_ids = subject_data[subject_column].apply(_sanitize_str_for_tex)
+                print(subject_ids)
+                return subject_ids.to_list()
+        else:
+            raise ValueError("The path '{}' is not an existing file!".format(subject_path))
+
     @property
-    def subject_ids(self):
-        # TODO: read from file if provided
+    def subject_indices(self):
         return list(range(1, self.num_subjects + 1))
 
     @property
-    def day_ids(self):
+    def day_indices(self):
         return list(range(1, self.num_days + 1))
 
     @property
-    def saliva_ids(self):
-        # TODO has_evening_salivette is ignored
+    def saliva_indices(self):
         return list(range(1, self.num_saliva_samples + 1))
 
 
-def _assert_is_dir(path: Path, raise_exception: Optional[bool] = True) -> Optional[bool]:
+def _assert_is_dir(path: Path) -> Optional[bool]:
     """Check if a path is a directory.
 
     Parameters
     ----------
     path : str
         path to check if it's a directory
-    raise_exception : bool, optional
-        whether to raise an exception or return a bool value
 
     Returns
     -------
-    ``True`` if ``path`` is a directory, ``False`` otherwise (if ``raise_exception`` is ``False``)
+    ``True`` if ``path`` is a directory
 
     Raises
     ------
     ValueError
-        if ``raise_exception`` is ``True`` and ``path`` is not a directory
-
+        if ``path`` is not a directory
     """
     # ensure pathlib
     file_name = Path(path)
     if not file_name.is_dir():
-        if raise_exception:
-            raise ValueError("The path '{}' is expected to be a directory, but it's not!".format(path))
-        return False
-
+        raise ValueError("The path '{}' is expected to be a directory, but it's not!".format(path))
     return True
 
 
 def _write_to_file(file: Path, content: str):
     """
-    Write the string `content` to `file`;
-    if `file` doesn't exist create it, otherwisen truncate it
+    Writes a given text to a file.
+    string `content` to `file`;
+    if `file` doesn't exist create it, otherwise truncate it
+    Parameters
+    ----------
+    file: :class:`~pathlib.Path`
+        path to file that will be written
+    content : str
+        string that will be inserted to file
     """
     # ensure pathlib
     file_name = Path(file)
@@ -94,3 +137,57 @@ def _write_to_file(file: Path, content: str):
 def _tex_to_pdf(output_dir: Path, output_file: str):
     # TODO: check if pdflatex is installed
     print(check_call(["pdflatex", f"-output-directory={output_dir}", output_file]))
+
+
+def _assert_file_ending(path: Path, ending: Union[str, list[str]]) -> bool:
+    """
+    Check if a path points to an existing file with a certain file ending.
+
+    Parameters
+    ----------
+    path : :class:`~pathlib.Path`
+        path to check if it's a directory
+    ending : str or list of str
+        file ending or a list of file endings that the file is expected to have
+
+    Returns
+    -------
+    ``True`` if ``path`` has the given file ending, ``False`` otherwise
+
+    Raises
+    ------
+    ValueError
+        if ``path`` is not pointing to a file
+    """
+    if path.is_file():
+        if isinstance(ending, str):
+            ending = [ending]
+        for end in ending:
+            if str(path).endswith(end):
+                return True
+        return False
+    else:
+        raise ValueError("The path is '{}' is not an existing file!".format(path))
+
+
+def _sanitize_str_for_tex(string: str) -> str:
+    """
+    Escapes the characters `"&", "%", "$", "#", "_", "{", "}", "~", "^", "\"` in a String to preserve them when compiled with pdflatex
+
+    Parameters
+    ----------
+    string : str
+       an arbitrary unescaped string
+
+    Returns
+    -------
+    Sanitized version of ``string`` with all characters of special meaning in latex escaped
+    """
+    escape_chars = ["&", "%", "$", "#", "_", "{", "}"]
+    replace_chars = {"~": r"\textasciitilde", "^": r"\textasciicircum", r"\\": r"\textbackslash"}
+    for c in escape_chars:
+        string = string.replace(c, rf"\{c}")
+    for c in replace_chars.keys():
+        string = string.replace(c, f"{replace_chars[c]}{c}")
+    print(string)
+    return string
