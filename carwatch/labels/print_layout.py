@@ -4,6 +4,8 @@ from abc import ABC
 
 
 class PrintLayout:
+    """Abstract class that represents a generic A4 label sheet."""
+
     __metaclass__ = abc.ABCMeta
 
     a4_height = 297
@@ -16,6 +18,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def num_cols(self) -> int:
+        """number of distinct labels per column"""
         pass
 
     @num_cols.setter
@@ -25,6 +28,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def num_rows(self) -> int:
+        """number of distinct labels per row"""
         pass
 
     @num_rows.setter
@@ -34,6 +38,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def left_margin(self) -> float:
+        """offset between edge of sheet and first label to the left"""
         pass
 
     @left_margin.setter
@@ -43,6 +48,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def right_margin(self) -> float:
+        """offset between edge of sheet and first label to the right"""
         pass
 
     @right_margin.setter
@@ -52,6 +58,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def top_margin(self) -> float:
+        """offset between edge of sheet and first label to the top"""
         pass
 
     @top_margin.setter
@@ -61,6 +68,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def bottom_margin(self) -> float:
+        """offset between edge of sheet and first label to the bottom"""
         pass
 
     @bottom_margin.setter
@@ -70,6 +78,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def inter_col(self) -> float:
+        """distance between each label along the columns"""
         pass
 
     @inter_col.setter
@@ -79,6 +88,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def inter_row(self) -> float:
+        """distance between each label along the rows"""
         pass
 
     @inter_row.setter
@@ -87,6 +97,7 @@ class PrintLayout:
 
 
 class AveryZweckformJ4791Layout(PrintLayout):
+    """Class that represents the layout of `AveryZweckformJ4791` label sheets."""
     num_cols = 4
     num_rows = 12
     left_margin = 9.8
@@ -98,6 +109,7 @@ class AveryZweckformJ4791Layout(PrintLayout):
 
 
 class CustomLayout(PrintLayout):
+    """Class that represents a user-defined label sheet layout."""
     num_cols = 0
     num_rows = 0
     left_margin = 0

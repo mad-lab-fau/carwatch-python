@@ -179,12 +179,14 @@ def _assert_file_ending(path: Path, ending: Union[str, list[str]]) -> bool:
 
     Returns
     -------
-    ``True`` if ``path`` has the given file ending, ``False`` otherwise
+    ``True`` if ``path`` has the given file ending
 
     Raises
     ------
     ValueError
-        if ``path`` is not pointing to a file
+        if ``path`` is not pointing to a file, or
+        if the file extension is invalid
+
     """
     if path.is_file():
         if isinstance(ending, str):
@@ -192,7 +194,7 @@ def _assert_file_ending(path: Path, ending: Union[str, list[str]]) -> bool:
         for end in ending:
             if str(path).endswith(end):
                 return True
-        return False
+        raise ValueError("The file has an invalid extension! It needs to be either a .csv or .txt file!")
     else:
         raise ValueError("The path is '{}' is not an existing file!".format(path))
 
