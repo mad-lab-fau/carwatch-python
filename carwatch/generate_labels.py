@@ -1,3 +1,9 @@
+from pathlib import Path
+import itertools
+import threading
+import time
+import sys
+
 import click
 from carwatch.labels import LabelGenerator, Study, _assert_file_ending
 
@@ -138,11 +144,11 @@ def validate_subject_path(ctx, param, value):
     envvar="PATHS",
     type=click.Path(file_okay=True, dir_okay=False),
 )
+
 def run(
         study_name,
         num_days,
         num_saliva_samples,
-        subject_data,
         subject_path,
         subject_column,
         num_subjects,
@@ -151,7 +157,21 @@ def run(
         has_barcode,
         output_dir,
         output_name,
+        **kwargs
 ):
+    done = False
+
+    def animate():
+        for c in itertools.cycle(['|', '/', '-', '\\']):
+            if done:
+                break
+            sys.stdout.write('\rloading ' + c)
+            sys.stdout.flush()
+            time.sleep(0.1)
+
+    t = threading.Thread(target=animate)
+    t.start()
+
     study = Study(
         study_name=study_name,
         num_days=num_days,
@@ -163,6 +183,7 @@ def run(
     )
     generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode)
     generator.generate(output_dir=output_dir, output_name=output_name)
+    done = True
 
 
 if __name__ == "__main__":

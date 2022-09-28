@@ -163,7 +163,7 @@ def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
         else:
             raise RuntimeError(
                 "Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again.")
-    print(f"PDF created succesfully and can be found here: {output_dir.absolute()}")
+    print(f"\nPDF created succesfully and can be found here: {output_dir.absolute()}")
 
 
 def _assert_file_ending(path: Path, ending: Union[str, list[str]]) -> bool:
