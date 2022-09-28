@@ -225,7 +225,7 @@ class LabelGenerator:
             # create table with 2 columns
             table_properties = r"{m{0.45\linewidth} m{0.4\linewidth}}" + "\n"
             # add barcode to first column
-            table_content += rf"\includegraphics[height={self.layout.get_label_height() - 4}mm]{{img/barcode_{subject:03d}{day:02d}{sample:02d}.pdf}} &"
+            table_content += rf"\includegraphics[height={self.layout.get_label_height() - 4}mm,width=\linewidth,keepaspectratio]{{img/barcode_{subject:03d}{day:02d}{sample:02d}.pdf}} &"
             font_size = r"\tiny"  # decrease font size to make it fit next to barcode
         else:
             # create table with only one column
