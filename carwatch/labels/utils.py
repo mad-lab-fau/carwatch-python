@@ -155,7 +155,7 @@ def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
     """
     try:
         #  call pdflatex and suppress console output
-        check_call(["pdflatex", f"-output-directory={output_dir}", tex_file], stdout=subprocess.DEVNULL)
+        check_call(["pdflatex", f"-output-directory={output_dir}", tex_file], stdout=subprocess.DEVNULL, timeout=60)
     except FileNotFoundError:
         if os.name.startswith("win"):
             raise RuntimeError(
@@ -163,6 +163,10 @@ def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
         else:
             raise RuntimeError(
                 "Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again.")
+    except subprocess.TimeoutExpired:
+        # when pdflatex gets stuck, process will not end automatically
+        raise RuntimeError(
+            "Compilation aborted as it took too long. Please check your input parameters for plausibility.")
     print(f"\nPDF created succesfully and can be found here: {output_dir.absolute()}")
 
 
