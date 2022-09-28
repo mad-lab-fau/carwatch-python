@@ -1,6 +1,5 @@
 import click
-
-from carwatch.labels import LabelGenerator, Study
+from carwatch.labels import LabelGenerator, Study, _assert_file_ending
 
 
 class Condition(click.Option):
@@ -42,6 +41,14 @@ class Condition(click.Option):
             ctx, opts, args)
 
 
+def validate_subject_path(ctx, param, value):
+    if value:
+        try:
+            _assert_file_ending(Path(value), [".csv", ".txt"])
+        except ValueError as e:
+            raise click.BadParameter(str(e))
+
+
 @click.command()
 @click.option(
     "--study-name", required=True, prompt="Study name", type=str, help="A descriptive abbreviation for your study name."
@@ -62,7 +69,6 @@ class Condition(click.Option):
     prompt="Read subject IDs from file?",
     is_flag=True,
 )
-# TODO: validate file extension
 @click.option(
     "--subject-path",
     default=None,
@@ -71,6 +77,7 @@ class Condition(click.Option):
     help="The path to the *.csv or *.txt file with the participant data.",
     envvar="PATHS",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    callback=validate_subject_path,
     cls=Condition,
     pos_condition="subject_data"
 )
