@@ -5,7 +5,7 @@ import time
 import sys
 
 import click
-from carwatch.labels import LabelGenerator, Study, _assert_file_ending
+from carwatch.labels import LabelGenerator, Study, _assert_file_ending, CustomLayout
 
 
 class Condition(click.Option):
@@ -38,10 +38,17 @@ class Condition(click.Option):
     def handle_parse_result(self, ctx, opts, args):
         is_condition = ctx.params[self.condition]
 
-        if not is_condition and self.is_positive:
-            self.prompt = None
-        if is_condition and not self.is_positive:
-            self.prompt = None
+        if not is_condition:
+            if self.is_positive:
+                self.prompt = None
+            else:
+                self.required = True
+
+        if is_condition:
+            if not self.is_positive:
+                self.prompt = None
+            else:
+                self.required = True
 
         return super(Condition, self).handle_parse_result(
             ctx, opts, args)
@@ -144,7 +151,77 @@ def validate_subject_path(ctx, param, value):
     envvar="PATHS",
     type=click.Path(file_okay=True, dir_okay=False),
 )
-
+@click.option(
+    "--custom-layout",
+    required=True,
+    prompt="Use custom layout instead of Avery Zweckform J4791?",
+    is_flag=True,
+    help="Whether a custom layout will be specified.",
+)
+@click.option(
+    "--num_cols",
+    prompt="Number of columns",
+    type=int,
+    help="The number of distinct labels per column",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
+@click.option(
+    "--num_rows",
+    prompt="Number of rows",
+    type=int,
+    help="The number of distinct labels per row",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
+@click.option(
+    "--left_margin",
+    prompt="Left margin",
+    type=float,
+    help="The offset between edge of sheet and first label to the left",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
+@click.option(
+    "--right_margin",
+    prompt="Right margin",
+    type=float,
+    help="The offset between edge of sheet and first label to the right",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
+@click.option(
+    "--top_margin",
+    prompt="Top margin",
+    type=float,
+    help="The offset between edge of sheet and first label to the top",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
+@click.option(
+    "--bottom_margin",
+    prompt="Bottom margin",
+    type=float,
+    help="The offset between edge of sheet and first label to the bottom",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
+@click.option(
+    "--inter_col",
+    prompt="Distance between columns",
+    type=float,
+    help="The distance between each label along the columns",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
+@click.option(
+    "--inter_row",
+    prompt="Distance between rows",
+    type=float,
+    help="The distance between each label along the rows",
+    cls=Condition,
+    pos_condition="custom_layout"
+)
 def run(
         study_name,
         num_days,
@@ -157,11 +234,13 @@ def run(
         has_barcode,
         output_dir,
         output_name,
+        custom_layout,
         **kwargs
 ):
     done = False
 
     def animate():
+        """Helper function to create a loading icon while input is processed"""
         for c in itertools.cycle(['|', '/', '-', '\\']):
             if done:
                 break
@@ -182,7 +261,14 @@ def run(
         has_evening_salivette=has_evening_salivette,
     )
     generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode)
-    generator.generate(output_dir=output_dir, output_name=output_name)
+    if custom_layout:
+        layout = CustomLayout(num_cols=kwargs["num_cols"], num_rows=kwargs["num_rows"],
+                              left_margin=kwargs["left_margin"], right_margin=kwargs["right_margin"],
+                              top_margin=kwargs["top_margin"], bottom_margin=kwargs["bottom_margin"],
+                              inter_col=kwargs["inter_col"], inter_row=kwargs["inter_row"])
+        generator.generate(output_dir=output_dir, output_name=output_name, layout=layout)
+    else:
+        generator.generate(output_dir=output_dir, output_name=output_name)
     done = True
 
 
