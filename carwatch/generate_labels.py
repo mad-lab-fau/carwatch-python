@@ -1,11 +1,12 @@
-from pathlib import Path
 import itertools
+import sys
 import threading
 import time
-import sys
+from pathlib import Path
 
 import click
-from carwatch.labels import LabelGenerator, Study, _assert_file_ending, CustomLayout
+
+from carwatch.labels import CustomLayout, LabelGenerator, Study, _assert_file_ending
 
 
 class Condition(click.Option):
@@ -28,10 +29,10 @@ class Condition(click.Option):
             ``False`` when the current option should be hidden if ``condition`` is ``True``
         """
         if "pos_condition" in kwargs.keys():
-            self.condition = kwargs.pop('pos_condition')
+            self.condition = kwargs.pop("pos_condition")
             self.is_positive = True
         else:
-            self.condition = kwargs.pop('neg_condition')
+            self.condition = kwargs.pop("neg_condition")
             self.is_positive = False
         super(Condition, self).__init__(*args, **kwargs)
 
@@ -50,8 +51,7 @@ class Condition(click.Option):
             else:
                 self.required = True
 
-        return super(Condition, self).handle_parse_result(
-            ctx, opts, args)
+        return super(Condition, self).handle_parse_result(ctx, opts, args)
 
 
 def validate_subject_path(ctx, param, value):
@@ -75,7 +75,7 @@ def validate_subject_path(ctx, param, value):
     required=True,
     prompt="Number of saliva samples [per day]",
     type=int,
-    help="The daily number of saliva samples taken from every participant."
+    help="The daily number of saliva samples taken from every participant.",
 )
 @click.option(
     "--subject-data",
@@ -93,7 +93,7 @@ def validate_subject_path(ctx, param, value):
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
     callback=validate_subject_path,
     cls=Condition,
-    pos_condition="subject_data"
+    pos_condition="subject_data",
 )
 @click.option(
     "--subject-column",
@@ -103,7 +103,7 @@ def validate_subject_path(ctx, param, value):
     type=str,
     help="The name of the subject ID column in participants data file.",
     cls=Condition,
-    pos_condition="subject_data"
+    pos_condition="subject_data",
 )
 @click.option(
     "--num-subjects",
@@ -112,7 +112,7 @@ def validate_subject_path(ctx, param, value):
     type=int,
     help="The number of participants in your study.",
     cls=Condition,
-    neg_condition="subject_data"
+    neg_condition="subject_data",
 )
 @click.option(
     "--has-evening-salivette",
@@ -134,7 +134,7 @@ def validate_subject_path(ctx, param, value):
     prompt="Add barcode to label?",
     is_flag=True,
     help="Whether a barcode encoding the participant id, day of study, and number of saliva sample will be"
-         " printed on every individual label.",
+    " printed on every individual label.",
 )
 @click.option(
     "--output_dir",
@@ -165,7 +165,7 @@ def validate_subject_path(ctx, param, value):
     type=int,
     help="The number of distinct labels per column",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 @click.option(
     "--num_rows",
@@ -173,7 +173,7 @@ def validate_subject_path(ctx, param, value):
     type=int,
     help="The number of distinct labels per row",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 @click.option(
     "--left_margin",
@@ -181,7 +181,7 @@ def validate_subject_path(ctx, param, value):
     type=float,
     help="The offset between edge of sheet and first label to the left in mm",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 @click.option(
     "--right_margin",
@@ -189,7 +189,7 @@ def validate_subject_path(ctx, param, value):
     type=float,
     help="The offset between edge of sheet and first label to the right in mm",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 @click.option(
     "--top_margin",
@@ -197,7 +197,7 @@ def validate_subject_path(ctx, param, value):
     type=float,
     help="The offset between edge of sheet and first label to the top in mm",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 @click.option(
     "--bottom_margin",
@@ -205,7 +205,7 @@ def validate_subject_path(ctx, param, value):
     type=float,
     help="The offset between edge of sheet and first label to the bottom in mm",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 @click.option(
     "--inter_col",
@@ -213,7 +213,7 @@ def validate_subject_path(ctx, param, value):
     type=float,
     help="The distance between each label along the columns in mm",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 @click.option(
     "--inter_row",
@@ -221,31 +221,31 @@ def validate_subject_path(ctx, param, value):
     type=float,
     help="The distance between each label along the rows in mm",
     cls=Condition,
-    pos_condition="custom_layout"
+    pos_condition="custom_layout",
 )
 def run(
-        study_name,
-        num_days,
-        num_saliva_samples,
-        subject_path,
-        subject_column,
-        num_subjects,
-        has_evening_salivette,
-        add_name,
-        has_barcode,
-        output_dir,
-        output_name,
-        custom_layout,
-        **kwargs
+    study_name,
+    num_days,
+    num_saliva_samples,
+    subject_path,
+    subject_column,
+    num_subjects,
+    has_evening_salivette,
+    add_name,
+    has_barcode,
+    output_dir,
+    output_name,
+    custom_layout,
+    **kwargs
 ):
     done = False
 
     def animate():
         """Helper function to create a loading icon while input is processed"""
-        for c in itertools.cycle(['|', '/', '-', '\\']):
+        for c in itertools.cycle(["|", "/", "-", "\\"]):
             if done:
                 break
-            sys.stdout.write('\rloading ' + c)
+            sys.stdout.write("\rloading " + c)
             sys.stdout.flush()
             time.sleep(0.1)
 
@@ -263,10 +263,16 @@ def run(
     )
     generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode)
     if custom_layout:
-        layout = CustomLayout(num_cols=kwargs["num_cols"], num_rows=kwargs["num_rows"],
-                              left_margin=kwargs["left_margin"], right_margin=kwargs["right_margin"],
-                              top_margin=kwargs["top_margin"], bottom_margin=kwargs["bottom_margin"],
-                              inter_col=kwargs["inter_col"], inter_row=kwargs["inter_row"])
+        layout = CustomLayout(
+            num_cols=kwargs["num_cols"],
+            num_rows=kwargs["num_rows"],
+            left_margin=kwargs["left_margin"],
+            right_margin=kwargs["right_margin"],
+            top_margin=kwargs["top_margin"],
+            bottom_margin=kwargs["bottom_margin"],
+            inter_col=kwargs["inter_col"],
+            inter_row=kwargs["inter_row"],
+        )
         generator.generate(output_dir=output_dir, output_name=output_name, layout=layout)
     else:
         generator.generate(output_dir=output_dir, output_name=output_name)

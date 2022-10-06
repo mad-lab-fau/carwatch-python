@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 from subprocess import check_call
 from typing import Optional, Union
+
 import pandas as pd
 
 
@@ -11,15 +12,14 @@ class Study:
     """Class that represents a study."""
 
     def __init__(
-            self,
-            study_name: str,
-            num_days: int,
-            num_saliva_samples: int,
-            num_subjects: Optional[int] = None,
-            subject_path: Optional[Union[str, Path]] = None,
-            subject_column: Optional[str] = "subject",
-            has_evening_salivette: bool = False,
-
+        self,
+        study_name: str,
+        num_days: int,
+        num_saliva_samples: int,
+        num_subjects: Optional[int] = None,
+        subject_path: Optional[Union[str, Path]] = None,
+        subject_column: Optional[str] = "subject",
+        has_evening_salivette: bool = False,
     ):
         """Class that represents a study.
 
@@ -52,7 +52,8 @@ class Study:
             self.subject_ids = [str(i) for i in range(1, self.num_subjects + 1)]
         else:
             raise ValueError(
-                "Subject number unknown! Specification of either `num_subjects` or `subject_data` required!")
+                "Subject number unknown! Specification of either `num_subjects` or `subject_data` required!"
+            )
 
         self.has_evening_salivette = has_evening_salivette
 
@@ -140,14 +141,14 @@ def _write_to_file(file: Path, content: str):
 
 def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
     """Run shell command to compile a tex file to a pdf document
-    
+
     Parameters
     ----------
     output_dir: path
         Path to directory where the output file will be stored
     tex_file: str or :class:`~pathlib.Path`
         Path to the `*.tex`-file that will be compiled
-        
+
     Raises
     ------
     RuntimeError
@@ -159,14 +160,17 @@ def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
     except FileNotFoundError:
         if os.name.startswith("win"):
             raise RuntimeError(
-                "Apparently you don't have Latex installled. Please install MikTex (from here: https://miktex.org/download), restart your computer, and try again.")
+                "Apparently you don't have Latex installled. Please install MikTex (from here: https://miktex.org/download), restart your computer, and try again."
+            )
         else:
             raise RuntimeError(
-                "Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again.")
+                "Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again."
+            )
     except subprocess.TimeoutExpired:
         # when pdflatex gets stuck, process will not end automatically
         raise RuntimeError(
-            "Compilation aborted as it took too long. Please check your input parameters for plausibility.")
+            "Compilation aborted as it took too long. Please check your input parameters for plausibility."
+        )
     print(f"\nPDF created succesfully and can be found here: {output_dir.absolute()}")
 
 

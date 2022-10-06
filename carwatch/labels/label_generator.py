@@ -70,11 +70,11 @@ class LabelGenerator:
         self.barcode_ids = None
 
     def generate(
-            self,
-            output_dir: str = ".",
-            output_name: Union[str, None] = None,
-            layout: PrintLayout = AveryZweckformJ4791Layout(),
-            debug=False,
+        self,
+        output_dir: str = ".",
+        output_name: Union[str, None] = None,
+        layout: PrintLayout = AveryZweckformJ4791Layout(),
+        debug=False,
     ):
         """
         Generates a `*.pdf` file with labels according to the LabelGenerator's properties
@@ -129,8 +129,9 @@ class LabelGenerator:
         """
         barcode_ids = [
             "{:03d}{:02d}{:02d}".format(subj, day, saliv)
-            for subj, day, saliv in
-            list(product(self.study.subject_indices, self.study.day_indices, self.study.saliva_indices))
+            for subj, day, saliv in list(
+                product(self.study.subject_indices, self.study.day_indices, self.study.saliva_indices)
+            )
         ]
         # sort the ids
         barcode_ids = np.array(sorted(barcode_ids))
@@ -246,11 +247,14 @@ class LabelGenerator:
             if self.has_barcode:
                 # insert infos as one row in the second column
                 table_content += (
-                        rf"\centering{font_size}{{{self.study.study_name}{delimiter}{subject_name}\newline T{day}\_S{sample}}}" + "\n"
+                    rf"\centering{font_size}{{{self.study.study_name}{delimiter}{subject_name}\newline T{day}\_S{sample}}}"
+                    + "\n"
                 )
             else:
                 # insert infos centered in two rows
-                table_content += rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
+                table_content += (
+                    rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
+                )
         else:
             # add day and sample to second column
             table_content += rf"\centering{font_size}{{T{day}\_S{sample}}}" + "\n"

@@ -98,6 +98,7 @@ class PrintLayout:
 
 class AveryZweckformJ4791Layout(PrintLayout):
     """Class that represents the layout of `AveryZweckformJ4791` label sheets."""
+
     num_cols = 4
     num_rows = 12
     left_margin = 9.8
@@ -110,6 +111,7 @@ class AveryZweckformJ4791Layout(PrintLayout):
 
 class CustomLayout(PrintLayout):
     """Class that represents a user-defined label sheet layout."""
+
     num_cols = 0
     num_rows = 0
     left_margin = 0
@@ -119,8 +121,17 @@ class CustomLayout(PrintLayout):
     inter_col = 0
     inter_row = 0
 
-    def __init__(self, num_cols: int, num_rows: int, left_margin: float, right_margin: float, top_margin: float,
-                 bottom_margin: float, inter_col: float, inter_row: float):
+    def __init__(
+        self,
+        num_cols: int,
+        num_rows: int,
+        left_margin: float,
+        right_margin: float,
+        top_margin: float,
+        bottom_margin: float,
+        inter_col: float,
+        inter_row: float,
+    ):
         self.num_cols = num_cols
         self.num_rows = num_rows
         self.left_margin = left_margin
