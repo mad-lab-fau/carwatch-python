@@ -60,6 +60,7 @@ def validate_subject_path(ctx, param, value):
             _assert_file_ending(Path(value), [".csv", ".txt"])
         except ValueError as e:
             raise click.BadParameter(str(e))
+    return value
 
 
 @click.command()
