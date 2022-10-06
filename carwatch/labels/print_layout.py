@@ -38,7 +38,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def left_margin(self) -> float:
-        """offset between edge of sheet and first label to the left"""
+        """offset between edge of sheet and first label to the left in mm"""
         pass
 
     @left_margin.setter
@@ -48,7 +48,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def right_margin(self) -> float:
-        """offset between edge of sheet and first label to the right"""
+        """offset between edge of sheet and first label to the right in mm"""
         pass
 
     @right_margin.setter
@@ -58,7 +58,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def top_margin(self) -> float:
-        """offset between edge of sheet and first label to the top"""
+        """offset between edge of sheet and first label to the top in mm"""
         pass
 
     @top_margin.setter
@@ -68,7 +68,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def bottom_margin(self) -> float:
-        """offset between edge of sheet and first label to the bottom"""
+        """offset between edge of sheet and first label to the bottom in mm"""
         pass
 
     @bottom_margin.setter
@@ -78,7 +78,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def inter_col(self) -> float:
-        """distance between each label along the columns"""
+        """distance between each label along the columns in mm"""
         pass
 
     @inter_col.setter
@@ -88,7 +88,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def inter_row(self) -> float:
-        """distance between each label along the rows"""
+        """distance between each label along the rows in mm"""
         pass
 
     @inter_row.setter

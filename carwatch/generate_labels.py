@@ -179,7 +179,7 @@ def validate_subject_path(ctx, param, value):
     "--left_margin",
     prompt="Left margin",
     type=float,
-    help="The offset between edge of sheet and first label to the left",
+    help="The offset between edge of sheet and first label to the left in mm",
     cls=Condition,
     pos_condition="custom_layout"
 )
@@ -187,7 +187,7 @@ def validate_subject_path(ctx, param, value):
     "--right_margin",
     prompt="Right margin",
     type=float,
-    help="The offset between edge of sheet and first label to the right",
+    help="The offset between edge of sheet and first label to the right in mm",
     cls=Condition,
     pos_condition="custom_layout"
 )
@@ -195,7 +195,7 @@ def validate_subject_path(ctx, param, value):
     "--top_margin",
     prompt="Top margin",
     type=float,
-    help="The offset between edge of sheet and first label to the top",
+    help="The offset between edge of sheet and first label to the top in mm",
     cls=Condition,
     pos_condition="custom_layout"
 )
@@ -203,7 +203,7 @@ def validate_subject_path(ctx, param, value):
     "--bottom_margin",
     prompt="Bottom margin",
     type=float,
-    help="The offset between edge of sheet and first label to the bottom",
+    help="The offset between edge of sheet and first label to the bottom in mm",
     cls=Condition,
     pos_condition="custom_layout"
 )
@@ -211,7 +211,7 @@ def validate_subject_path(ctx, param, value):
     "--inter_col",
     prompt="Distance between columns",
     type=float,
-    help="The distance between each label along the columns",
+    help="The distance between each label along the columns in mm",
     cls=Condition,
     pos_condition="custom_layout"
 )
@@ -219,7 +219,7 @@ def validate_subject_path(ctx, param, value):
     "--inter_row",
     prompt="Distance between rows",
     type=float,
-    help="The distance between each label along the rows",
+    help="The distance between each label along the rows in mm",
     cls=Condition,
     pos_condition="custom_layout"
 )
