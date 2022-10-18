@@ -1,6 +1,5 @@
 """Includes properties of predefined layouts for printing. All measurements need to be specified in mm."""
 import abc
-from abc import ABC
 
 
 class PrintLayout:
@@ -18,8 +17,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def num_cols(self) -> int:
-        """number of distinct labels per column"""
-        pass
+        """Return number of distinct labels per column."""
 
     @num_cols.setter
     def num_cols(self, value):
@@ -28,8 +26,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def num_rows(self) -> int:
-        """number of distinct labels per row"""
-        pass
+        """Return number of distinct labels per row."""
 
     @num_rows.setter
     def num_rows(self, value):
@@ -38,8 +35,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def left_margin(self) -> float:
-        """offset between edge of sheet and first label to the left in mm"""
-        pass
+        """Return offset between edge of sheet and first label to the left in mm."""
 
     @left_margin.setter
     def left_margin(self, value):
@@ -48,8 +44,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def right_margin(self) -> float:
-        """offset between edge of sheet and first label to the right in mm"""
-        pass
+        """Return offset between edge of sheet and first label to the right in mm."""
 
     @right_margin.setter
     def right_margin(self, value):
@@ -58,8 +53,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def top_margin(self) -> float:
-        """offset between edge of sheet and first label to the top in mm"""
-        pass
+        """Return offset between edge of sheet and first label to the top in mm."""
 
     @top_margin.setter
     def top_margin(self, value):
@@ -68,8 +62,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def bottom_margin(self) -> float:
-        """offset between edge of sheet and first label to the bottom in mm"""
-        pass
+        """Return offset between edge of sheet and first label to the bottom in mm."""
 
     @bottom_margin.setter
     def bottom_margin(self, value):
@@ -78,8 +71,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def inter_col(self) -> float:
-        """distance between each label along the columns in mm"""
-        pass
+        """Return distance between each label along the columns in mm."""
 
     @inter_col.setter
     def inter_col(self, value):
@@ -88,8 +80,7 @@ class PrintLayout:
     @property
     @abc.abstractmethod
     def inter_row(self) -> float:
-        """distance between each label along the rows in mm"""
-        pass
+        """Return distance between each label along the rows in mm."""
 
     @inter_row.setter
     def inter_row(self, value):

@@ -3,6 +3,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import Optional
 
 import click
 
@@ -13,11 +14,11 @@ class Condition(click.Option):
     """Helper class that displays options as prompt depending on flag options previously set by user."""
 
     def __init__(self, *args, **kwargs):
-        """
+        """Display options as prompt depending on flag options previously set by user.
+
         To invoke this feature for an option, specify ``cls=Condition`` and ``pos_condition="conditional_option"``
         for positive relations and ``neg_condition="conditional_option"`` for negative relations.
         Note that ``conditional_option`` need to be either a flag or a bool.
-
 
         Parameters
         ----------
@@ -27,14 +28,15 @@ class Condition(click.Option):
             ``True`` when the relation between current and conditional variable are positive,
             i.e., prompt for current option is shown when ``condition`` is ``True``
             ``False`` when the current option should be hidden if ``condition`` is ``True``
+
         """
-        if "pos_condition" in kwargs.keys():
+        if "pos_condition" in kwargs:
             self.condition = kwargs.pop("pos_condition")
             self.is_positive = True
         else:
             self.condition = kwargs.pop("neg_condition")
             self.is_positive = False
-        super(Condition, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):
         is_condition = ctx.params[self.condition]
@@ -51,10 +53,10 @@ class Condition(click.Option):
             else:
                 self.required = True
 
-        return super(Condition, self).handle_parse_result(ctx, opts, args)
+        return super().handle_parse_result(ctx, opts, args)
 
 
-def validate_subject_path(ctx, param, value):
+def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     if value:
         try:
             _assert_file_ending(Path(value), [".csv", ".txt"])
@@ -224,24 +226,24 @@ def validate_subject_path(ctx, param, value):
     pos_condition="custom_layout",
 )
 def run(
-    study_name,
-    num_days,
-    num_saliva_samples,
-    subject_path,
-    subject_column,
-    num_subjects,
-    has_evening_salivette,
-    add_name,
-    has_barcode,
-    output_dir,
-    output_name,
-    custom_layout,
+    study_name: Optional[str] = None,
+    num_days: Optional[int] = None,
+    num_saliva_samples: Optional[int] = None,
+    subject_path: Optional[str] = None,
+    subject_column: Optional[str] = None,
+    num_subjects: Optional[int] = None,
+    has_evening_salivette: Optional[bool] = None,
+    add_name: Optional[bool] = None,
+    has_barcode: Optional[bool] = None,
+    output_dir: Optional[str] = None,
+    output_name: Optional[str] = None,
+    custom_layout: Optional[bool] = None,
     **kwargs
 ):
     done = False
 
     def animate():
-        """Helper function to create a loading icon while input is processed"""
+        """Create a loading icon while input is processed."""
         for c in itertools.cycle(["|", "/", "-", "\\"]):
             if done:
                 break

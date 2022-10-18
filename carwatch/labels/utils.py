@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 from subprocess import check_call
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 import pandas as pd
 
@@ -40,6 +40,7 @@ class Study:
             default value is ``"subject"``.
         has_evening_salivette: bool, optional
             Whether a saliva sample in the evening is also collected, default is ``False``
+
         """
         self.study_name = study_name
         self.num_days = num_days
@@ -57,21 +58,26 @@ class Study:
 
         self.has_evening_salivette = has_evening_salivette
 
-    def _determine_subject_ids(self, subject_path: Union[str, Path], subject_column: str):
-        """
-        Extract the IDs of the study participants depending on the content of the subject data file.
+    @staticmethod
+    def _determine_subject_ids(subject_path: Union[str, Path], subject_column: str) -> Sequence[str]:
+        """Extract the IDs of the study participants.
+
+        The IDs uf the study participants are extracted depending on the content of the subject data file.
         It is assumed that the subject data contains comma-separated tabular data with a header row.
 
         Parameters
         ----------
-        study_name: str or :class:`~pathlib.Path`
+        subject_path : str or :class:`~pathlib.Path`
             Path to either a `*.csv` or `*.txt` file that contains the tabular participant data,
             assumes that every row corresponds to one subject
-        subject_column: name of the column that contains the subject ids
+        subject_column : str
+            name of the column that contains the subject ids
 
         Returns
         -------
-        The length of the subject list, i.e., the number of subjects
+        list
+            list with subject IDs
+
         """
         subject_path = Path(subject_path)
         try:
@@ -79,6 +85,7 @@ class Study:
                 subject_data = pd.read_csv(subject_path)
                 subject_ids = subject_data[subject_column].apply(_sanitize_str_for_tex)
                 return subject_ids.to_list()
+            # TODO: what to do/return if subject_path is not csv or txt?
         except ValueError as e:
             print(e)
             sys.exit(1)
@@ -112,19 +119,19 @@ def _assert_is_dir(path: Path) -> Optional[bool]:
     ------
     ValueError
         if ``path`` is not a directory
+
     """
     # ensure pathlib
     file_name = Path(path)
     if not file_name.is_dir():
-        raise ValueError("The path '{}' is expected to be a directory, but it's not!".format(path))
+        raise ValueError(f"The path '{path}' is expected to be a directory, but it's not!")
     return True
 
 
 def _write_to_file(file: Path, content: str):
-    """
-    Writes a given text to a file.
-    string `content` to `file`;
-    if `file` doesn't exist create it, otherwise truncate it
+    """Write a given text to a file.
+
+    If `file` doesn't exist it is created, otherwise, it is truncated.
 
     Parameters
     ----------
@@ -132,15 +139,16 @@ def _write_to_file(file: Path, content: str):
         path to file that will be written
     content : str
         string that will be inserted to file
+
     """
     # ensure pathlib
     file_name = Path(file)
-    with open(file_name, "w+") as fp:
+    with open(file_name, "w+", encoding="utf-8") as fp:
         fp.write(content)
 
 
 def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
-    """Run shell command to compile a tex file to a pdf document
+    """Run shell command to compile a tex file to a pdf document.
 
     Parameters
     ----------
@@ -153,30 +161,31 @@ def _tex_to_pdf(output_dir: Path, tex_file: Union[str, Path]):
     ------
     RuntimeError
         if ``pdflatex`` is not found
+
     """
     try:
         #  call pdflatex and suppress console output
         check_call(["pdflatex", f"-output-directory={output_dir}", tex_file], stdout=subprocess.DEVNULL, timeout=60)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         if os.name.startswith("win"):
             raise RuntimeError(
-                "Apparently you don't have Latex installled. Please install MikTex (from here: https://miktex.org/download), restart your computer, and try again."
-            )
-        else:
-            raise RuntimeError(
-                "Apparently you don't have Latex installled. Please install TexLive (from here: https://tug.org/texlive/) and try again."
-            )
-    except subprocess.TimeoutExpired:
+                "Apparently, you don't have Latex installed. "
+                "Please install MikTex (from here: https://miktex.org/download), restart your computer, and try again."
+            ) from e
+        raise RuntimeError(
+            "Apparently, you don't have Latex installed. "
+            "Please install TexLive (from here: https://tug.org/texlive/) and try again."
+        ) from e
+    except subprocess.TimeoutExpired as e:
         # when pdflatex gets stuck, process will not end automatically
         raise RuntimeError(
             "Compilation aborted as it took too long. Please check your input parameters for plausibility."
-        )
-    print(f"\nPDF created succesfully and can be found here: {output_dir.absolute()}")
+        ) from e
+    print(f"\nPDF created successfully and can be found here: {output_dir.absolute()}")
 
 
-def _assert_file_ending(path: Path, ending: Union[str, list[str]]) -> bool:
-    """
-    Check if a path points to an existing file with a certain file ending.
+def _assert_file_ending(path: Path, ending: Union[str, Sequence[str]]) -> bool:
+    """Check if a path points to an existing file with a certain file ending.
 
     Parameters
     ----------
@@ -203,13 +212,13 @@ def _assert_file_ending(path: Path, ending: Union[str, list[str]]) -> bool:
             if str(path).endswith(end):
                 return True
         raise ValueError("The file has an invalid extension! It needs to be either a .csv or .txt file!")
-    else:
-        raise ValueError("The path is '{}' is not an existing file!".format(path))
+    raise ValueError(f"The path is '{path}' is not an existing file!")
 
 
 def _sanitize_str_for_tex(string: str) -> str:
-    """
-    Escapes the characters `"&", "%", "$", "#", "_", "{", "}", "~", "^", "\"` in a String to preserve them when compiled with pdflatex
+    r"""Escape special characters in a string to preserve them when compiled with pdflatex.
+
+    The characters that are escaped are: `"&", "%", "$", "#", "_", "{", "}", "~", "^", "\"`.
 
     Parameters
     ----------
@@ -218,12 +227,14 @@ def _sanitize_str_for_tex(string: str) -> str:
 
     Returns
     -------
-    Sanitized version of ``string`` with all characters of special meaning in latex escaped
+    str
+        Sanitized version of ``string`` with all characters of special meaning in latex escaped
+
     """
     escape_chars = ["&", "%", "$", "#", "_", "{", "}"]
     replace_chars = {"~": r"\textasciitilde", "^": r"\textasciicircum", r"\\": r"\textbackslash"}
     for c in escape_chars:
         string = string.replace(c, rf"\{c}")
-    for c in replace_chars.keys():
-        string = string.replace(c, f"{replace_chars[c]}")
+    for c, val in replace_chars.items():
+        string = string.replace(c, f"{val}")
     return string
