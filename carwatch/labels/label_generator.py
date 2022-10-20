@@ -245,8 +245,9 @@ class LabelGenerator:
         day = int(barcode_id // 100) % 100
         sample = barcode_id % 100
         subject = int(barcode_id // 1e4)
-        subject_name = f"{subject:02d}"
-        if self.study.subject_ids:
+        subject_name_padding = len(str(self.study.num_subjects)) # length of zero-padding depending on subject count
+        subject_name = f"{subject:0{subject_name_padding}d}"
+        if self.study.subject_path:
             # subject has a certain identifier and not just a number
             subject_name = self.study.subject_ids[subject - 1]
         # label is realized with latex table
@@ -273,7 +274,7 @@ class LabelGenerator:
             delimiter = r"\_"
             if len(self.study.study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
                 # insert linebreak between study name and subject id to prevent overflow
-                delimiter = r"\linebreak "
+                delimiter = r"\newline "
             if all([sample == self.study.num_saliva_samples, self.study.has_evening_salivette]):
                 # if last sample of the day is evening salivette, it is marked as "TA"
                 sample = "A"
@@ -281,7 +282,7 @@ class LabelGenerator:
             if self.has_barcode:
                 # insert infos as one row in the second column
                 table_content += (
-                    rf"\centering{font_size}{{{self.study.study_name}{delimiter}{subject_name}"
+                    rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}"
                     + rf"\newline T{day}\_S{sample}}}"
                     + "\n"
                 )

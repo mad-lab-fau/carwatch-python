@@ -4,7 +4,7 @@ if __name__ == "__main__":
     study = Study(
         study_name="ExampleStudy",
         num_days=3,
-        num_subjects=5,
+        num_subjects=15,
         num_saliva_samples=5,
         has_evening_salivette=True,
     )

@@ -11,6 +11,8 @@ import pandas as pd
 class Study:
     """Class that represents a study."""
 
+    MAX_NUM_SUBJECTS = 999 # maximal amount of subjects representable with EAN8
+
     def __init__(
         self,
         study_name: str,
@@ -45,7 +47,8 @@ class Study:
         self.study_name = study_name
         self.num_days = num_days
         self.num_saliva_samples = num_saliva_samples
-        if subject_path:
+        self.subject_path = subject_path
+        if self.subject_path:
             self.subject_ids = self._determine_subject_ids(subject_path, subject_column)
             self.num_subjects = len(self.subject_ids)
         elif num_subjects:
@@ -55,7 +58,10 @@ class Study:
             raise ValueError(
                 "Subject number unknown! Specification of either `num_subjects` or `subject_data` required!"
             )
-
+        if num_subjects > Study.MAX_NUM_SUBJECTS:
+            raise ValueError(
+                f"Sorry, studies with more than {Study.MAX_NUM_SUBJECTS} participants are not supported!"
+            )
         self.has_evening_salivette = has_evening_salivette
 
     @staticmethod
