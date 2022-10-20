@@ -4,7 +4,7 @@ if __name__ == "__main__":
     study = Study(
         study_name="ExampleStudy",
         num_days=3,
-        subject_path="subjects.csv",
+        num_subjects=5,
         num_saliva_samples=5,
         has_evening_salivette=True,
     )
@@ -19,4 +19,4 @@ if __name__ == "__main__":
         inter_col=0.2,
         inter_row=0.5,
     )
-    generator.generate(output_dir="./output_labels", debug=True, layout=layout)
+    generator.generate(output_dir=".", debug=True, layout=layout)
