@@ -85,7 +85,7 @@ class Study:
                 subject_data = pd.read_csv(subject_path)
                 subject_ids = subject_data[subject_column].apply(_sanitize_str_for_tex)
                 return subject_ids.to_list()
-            # TODO: what to do/return if subject_path is not csv or txt?
+        # _assert_file_ending throws value error if file has wrong ending/doesn't exist
         except ValueError as e:
             print(e)
             sys.exit(1)

@@ -218,7 +218,7 @@ class LabelGenerator:
         from carwatch import labels  # package containing tex template # pylint:disable=import-outside-toplevel
 
         # copy tex template to output dir
-        # TODO: is this way really necessary? why don't you just read in the file in a regular way?
+        # use pkg_resources to find the template indepentently from cwd
         template = pkg_resources.read_text(labels, "barcode_template.tex")
         _write_to_file(self.output_dir.joinpath(self.output_name + ".tex"), template)
 
