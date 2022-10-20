@@ -288,7 +288,7 @@ class LabelGenerator:
             else:
                 # insert infos centered in two rows
                 table_content += (
-                    rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}}}\\{{T{day}\_S{sample}}}\n"
+                    rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
                 )
         else:
             # add day and sample to second column
