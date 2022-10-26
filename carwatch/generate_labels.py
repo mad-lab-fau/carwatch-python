@@ -117,6 +117,22 @@ def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     neg_condition="subject_data",
 )
 @click.option(
+    "--has-subject-prefix",
+    required=True,
+    prompt="Add prefix to participant number (e.g., 'VP_')?",
+    is_flag=True,
+)
+@click.option(
+    "--subject-prefix",
+    default="VP_",
+    required=False,
+    prompt="Subject prefix",
+    type=str,
+    help="Specification of subject prefix.",
+    cls=Condition,
+    pos_condition="has_subject_prefix",
+)
+@click.option(
     "--has-evening-salivette",
     required=True,
     prompt="Evening salivette?",
@@ -232,6 +248,8 @@ def run(
     subject_path: Optional[str] = None,
     subject_column: Optional[str] = None,
     num_subjects: Optional[int] = None,
+    has_subject_prefix: Optional[bool] = None,
+    subject_prefix: Optional[str] = None,
     has_evening_salivette: Optional[bool] = None,
     add_name: Optional[bool] = None,
     has_barcode: Optional[bool] = None,
@@ -253,7 +271,6 @@ def run(
 
     t = threading.Thread(target=animate)
     t.start()
-
     study = Study(
         study_name=study_name,
         num_days=num_days,
@@ -261,6 +278,7 @@ def run(
         num_subjects=num_subjects,
         subject_path=subject_path,
         subject_column=subject_column,
+        subject_prefix=subject_prefix,
         has_evening_salivette=has_evening_salivette,
     )
     generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode)

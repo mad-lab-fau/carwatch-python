@@ -11,17 +11,18 @@ import pandas as pd
 class Study:
     """Class that represents a study."""
 
-    MAX_NUM_SUBJECTS = 999 # maximal amount of subjects representable with EAN8
+    MAX_NUM_SUBJECTS = 999  # maximal amount of subjects representable with EAN8
 
     def __init__(
-        self,
-        study_name: str,
-        num_days: int,
-        num_saliva_samples: int,
-        num_subjects: Optional[int] = None,
-        subject_path: Optional[Union[str, Path]] = None,
-        subject_column: Optional[str] = "subject",
-        has_evening_salivette: bool = False,
+            self,
+            study_name: str,
+            num_days: int,
+            num_saliva_samples: int,
+            num_subjects: Optional[int] = None,
+            subject_path: Optional[Union[str, Path]] = None,
+            subject_column: Optional[str] = "subject",
+            subject_prefix: Optional[str] = None,
+            has_evening_salivette: bool = False,
     ):
         """Class that represents a study.
 
@@ -40,6 +41,8 @@ class Study:
         subject_column: str, optional
             Only used when ``subject_path`` is set, specifies the column name containing the subejct ids,
             default value is ``"subject"``.
+        subject_prefix: str, optional
+            Add prefix to participant number (e.g., "VP_")
         has_evening_salivette: bool, optional
             Whether a saliva sample in the evening is also collected, default is ``False``
 
@@ -58,10 +61,13 @@ class Study:
             raise ValueError(
                 "Subject number unknown! Specification of either `num_subjects` or `subject_data` required!"
             )
-        if num_subjects > Study.MAX_NUM_SUBJECTS:
+        if self.num_subjects > Study.MAX_NUM_SUBJECTS:
             raise ValueError(
                 f"Sorry, studies with more than {Study.MAX_NUM_SUBJECTS} participants are not supported!"
             )
+        if subject_prefix:
+            subject_prefix = _sanitize_str_for_tex(subject_prefix)
+        self.subject_prefix = subject_prefix
         self.has_evening_salivette = has_evening_salivette
 
     @staticmethod
