@@ -245,7 +245,7 @@ class LabelGenerator:
         day = int(barcode_id // 100) % 100
         sample = barcode_id % 100
         subject = int(barcode_id // 1e4)
-        subject_name_padding = len(str(self.study.num_subjects)) # length of zero-padding depending on subject count
+        subject_name_padding = len(str(self.study.num_subjects))  # length of zero-padding depending on subject count
         subject_name = f"{subject:0{subject_name_padding}d}"
         if self.study.subject_path:
             # subject has a certain identifier and not just a number

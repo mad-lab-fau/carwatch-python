@@ -14,15 +14,15 @@ class Study:
     MAX_NUM_SUBJECTS = 999  # maximal amount of subjects representable with EAN8
 
     def __init__(
-            self,
-            study_name: str,
-            num_days: int,
-            num_saliva_samples: int,
-            num_subjects: Optional[int] = None,
-            subject_path: Optional[Union[str, Path]] = None,
-            subject_column: Optional[str] = "subject",
-            subject_prefix: Optional[str] = None,
-            has_evening_salivette: bool = False,
+        self,
+        study_name: str,
+        num_days: int,
+        num_saliva_samples: int,
+        num_subjects: Optional[int] = None,
+        subject_path: Optional[Union[str, Path]] = None,
+        subject_column: Optional[str] = "subject",
+        subject_prefix: Optional[str] = None,
+        has_evening_salivette: bool = False,
     ):
         """Class that represents a study.
 
@@ -62,16 +62,14 @@ class Study:
                 "Subject number unknown! Specification of either `num_subjects` or `subject_data` required!"
             )
         if self.num_subjects > Study.MAX_NUM_SUBJECTS:
-            raise ValueError(
-                f"Sorry, studies with more than {Study.MAX_NUM_SUBJECTS} participants are not supported!"
-            )
+            raise ValueError(f"Sorry, studies with more than {Study.MAX_NUM_SUBJECTS} participants are not supported!")
         if subject_prefix:
             subject_prefix = _sanitize_str_for_tex(subject_prefix)
         self.subject_prefix = subject_prefix
         self.has_evening_salivette = has_evening_salivette
 
     @staticmethod
-    def _determine_subject_ids(subject_path: Union[str, Path], subject_column: str) -> Sequence[str]:
+    def _determine_subject_ids(subject_path: Union[str, Path], subject_column: str) -> Optional[Sequence[str]]:
         """Extract the IDs of the study participants.
 
         The IDs uf the study participants are extracted depending on the content of the subject data file.
@@ -97,6 +95,7 @@ class Study:
                 subject_data = pd.read_csv(subject_path)
                 subject_ids = subject_data[subject_column].apply(_sanitize_str_for_tex)
                 return subject_ids.to_list()
+            return None
         # _assert_file_ending throws value error if file has wrong ending/doesn't exist
         except ValueError as e:
             print(e)
