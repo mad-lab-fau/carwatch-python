@@ -47,7 +47,7 @@ class Study:
             Whether a saliva sample in the evening is also collected, default is ``False``
 
         """
-        self.study_name = study_name
+        self.study_name = _sanitize_str_for_tex(study_name)
         self.num_days = num_days
         self.num_saliva_samples = num_saliva_samples
         self.subject_path = subject_path
