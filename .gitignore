@@ -236,3 +236,16 @@ $RECYCLE.BIN/
 
 # PyCharm
 .idea
+
+# Ignore Latex files
+*.aux
+*.out
+*.toc
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Ignore Output files
+*.pdf
