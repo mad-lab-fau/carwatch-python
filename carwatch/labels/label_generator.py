@@ -290,9 +290,14 @@ class LabelGenerator:
                 )
             else:
                 # insert infos centered in two rows
-                table_content += (
-                    rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
-                )
+                if len(self.study.study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
+                    table_content += (
+                            rf"{font_size}{{{self.study.study_name}}}\\{{{subject_name}\_T{day}\_S{sample}}}" + "\n"
+                    )
+                else:
+                    table_content += (
+                        rf"{font_size}{{{self.study.study_name}\_{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
+                    )
         else:
             # add day and sample to second column
             table_content += rf"\centering{font_size}{{T{day}\_S{sample}}}" + "\n"
