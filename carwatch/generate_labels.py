@@ -7,7 +7,8 @@ from typing import Optional
 
 import click
 
-from carwatch.labels import CustomLayout, LabelGenerator, Study, _assert_file_ending
+from carwatch.labels import CustomLayout, LabelGenerator
+from carwatch.utils import Study, assert_file_ending
 
 
 class Condition(click.Option):
@@ -59,7 +60,7 @@ class Condition(click.Option):
 def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     if value:
         try:
-            _assert_file_ending(Path(value), [".csv", ".txt"])
+            assert_file_ending(Path(value), [".csv", ".txt"])
         except ValueError as e:
             raise click.BadParameter(str(e))
     return value
@@ -152,7 +153,7 @@ def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     prompt="Add barcode to label?",
     is_flag=True,
     help="Whether a barcode encoding the participant id, day of study, and number of saliva sample will be"
-    " printed on every individual label.",
+         " printed on every individual label.",
 )
 @click.option(
     "--output_dir",
@@ -242,21 +243,21 @@ def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     pos_condition="custom_layout",
 )
 def run(
-    study_name: Optional[str] = None,
-    num_days: Optional[int] = None,
-    num_saliva_samples: Optional[int] = None,
-    subject_path: Optional[str] = None,
-    subject_column: Optional[str] = None,
-    num_subjects: Optional[int] = None,
-    has_subject_prefix: Optional[bool] = None,
-    subject_prefix: Optional[str] = None,
-    has_evening_salivette: Optional[bool] = None,
-    add_name: Optional[bool] = None,
-    has_barcode: Optional[bool] = None,
-    output_dir: Optional[str] = None,
-    output_name: Optional[str] = None,
-    custom_layout: Optional[bool] = None,
-    **kwargs
+        study_name: Optional[str] = None,
+        num_days: Optional[int] = None,
+        num_saliva_samples: Optional[int] = None,
+        subject_path: Optional[str] = None,
+        subject_column: Optional[str] = None,
+        num_subjects: Optional[int] = None,
+        has_subject_prefix: Optional[bool] = None,
+        subject_prefix: Optional[str] = None,
+        has_evening_salivette: Optional[bool] = None,
+        add_name: Optional[bool] = None,
+        has_barcode: Optional[bool] = None,
+        output_dir: Optional[str] = None,
+        output_name: Optional[str] = None,
+        custom_layout: Optional[bool] = None,
+        **kwargs
 ):
     done = False
 

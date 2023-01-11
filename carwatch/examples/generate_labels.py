@@ -1,4 +1,5 @@
-from carwatch.labels import CustomLayout, LabelGenerator, Study
+from carwatch.labels import CustomLayout, LabelGenerator
+from carwatch.utils import Study
 
 if __name__ == "__main__":
     study = Study(
