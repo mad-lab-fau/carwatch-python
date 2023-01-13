@@ -13,15 +13,15 @@ class Study:
     MAX_NUM_SUBJECTS = 999  # maximal amount of subjects representable with EAN8
 
     def __init__(
-        self,
-        study_name: str,
-        num_days: int,
-        num_saliva_samples: int,
-        num_subjects: Optional[int] = None,
-        subject_path: Optional[Union[str, Path]] = None,
-        subject_column: Optional[str] = "subject",
-        subject_prefix: Optional[str] = None,
-        has_evening_salivette: bool = False,
+            self,
+            study_name: str,
+            num_days: int,
+            num_saliva_samples: int,
+            num_subjects: Optional[int] = None,
+            subject_path: Optional[Union[str, Path]] = None,
+            subject_column: Optional[str] = "subject",
+            subject_prefix: Optional[str] = None,
+            has_evening_salivette: bool = False,
     ):
         """Class that represents a study.
 
@@ -103,6 +103,13 @@ class Study:
     @property
     def subject_indices(self):
         return list(range(1, self.num_subjects + 1))
+
+    @property
+    def subject_names(self):
+        if self.subject_prefix:
+            return [f"{self.subject_prefix}{name}" for name in self.subject_ids]
+        else:
+            return self.subject_ids
 
     @property
     def day_indices(self):

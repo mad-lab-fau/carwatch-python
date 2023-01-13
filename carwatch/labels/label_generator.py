@@ -251,9 +251,7 @@ class LabelGenerator:
         subject_name = f"{subject:0{subject_name_padding}d}"
         if self.study.subject_path:
             # subject has a certain identifier and not just a number
-            subject_name = self.study.subject_ids[subject - 1]
-        if self.study.subject_prefix:
-            subject_name = f"{self.study.subject_prefix}{subject_name}"
+            subject_name = self.study.subject_names[subject - 1]
         # label is realized with latex table
         label_head = r"\genericlabel" + "\n" + r"\begin{tabular}"
         label_foot = r"\end{tabular}" + "\n\n"
