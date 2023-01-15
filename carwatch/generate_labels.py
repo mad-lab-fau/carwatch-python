@@ -2,67 +2,13 @@ import itertools
 import sys
 import threading
 import time
-from pathlib import Path
-from typing import Optional
+from typing import Optional, Union, Sequence
 
 import click
 
-from carwatch.labels import CustomLayout, LabelGenerator, Study, _assert_file_ending
-
-
-class Condition(click.Option):
-    """Helper class that displays options as prompt depending on flag options previously set by user."""
-
-    def __init__(self, *args, **kwargs):
-        """Display options as prompt depending on flag options previously set by user.
-
-        To invoke this feature for an option, specify ``cls=Condition`` and ``pos_condition="conditional_option"``
-        for positive relations and ``neg_condition="conditional_option"`` for negative relations.
-        Note that ``conditional_option`` need to be either a flag or a bool.
-
-        Parameters
-        ----------
-        condition: str
-            name of a previously prompted variable that decides whether the current option is needed or not
-        is_positive: bool
-            ``True`` when the relation between current and conditional variable are positive,
-            i.e., prompt for current option is shown when ``condition`` is ``True``
-            ``False`` when the current option should be hidden if ``condition`` is ``True``
-
-        """
-        if "pos_condition" in kwargs:
-            self.condition = kwargs.pop("pos_condition")
-            self.is_positive = True
-        else:
-            self.condition = kwargs.pop("neg_condition")
-            self.is_positive = False
-        super().__init__(*args, **kwargs)
-
-    def handle_parse_result(self, ctx, opts, args):
-        is_condition = ctx.params[self.condition]
-
-        if not is_condition:
-            if self.is_positive:
-                self.prompt = None
-            else:
-                self.required = True
-
-        if is_condition:
-            if not self.is_positive:
-                self.prompt = None
-            else:
-                self.required = True
-
-        return super().handle_parse_result(ctx, opts, args)
-
-
-def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
-    if value:
-        try:
-            _assert_file_ending(Path(value), [".csv", ".txt"])
-        except ValueError as e:
-            raise click.BadParameter(str(e))
-    return value
+from carwatch.labels import CustomLayout, LabelGenerator
+from carwatch.qr_codes import QrCodeGenerator
+from carwatch.utils import Study, validate_subject_path, Condition, validate_mail_input, validate_saliva_distances
 
 
 @click.command()
@@ -140,42 +86,36 @@ def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     help="Whether a saliva sample is taken in the evening.",
 )
 @click.option(
-    "--add-name",
+    "--generate-barcode",
     required=True,
+    prompt="Generate printable labels for study?",
+    is_flag=True,
+    help="Whether a PDF with barcodes encoding the information for individual saliva samples should be generated.",
+)
+@click.option(
+    "--add-name",
     prompt="Add study name and participant number to label?",
     is_flag=True,
     help="Whether a the study name and participant id will be printed on every individual label.",
+    cls=Condition,
+    pos_condition="generate_barcode",
 )
 @click.option(
     "--has-barcode",
-    required=True,
     prompt="Add barcode to label?",
     is_flag=True,
     help="Whether a barcode encoding the participant id, day of study, and number of saliva sample will be"
-    " printed on every individual label.",
-)
-@click.option(
-    "--output_dir",
-    default=".",
-    prompt="Output directory for labels",
-    help="Directory where generated labels will be stored.",
-    envvar="PATHS",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-)
-@click.option(
-    "--output_name",
-    default="barcodes",
-    prompt="Name of label file",
-    help="Name of the generated label file.",
-    envvar="PATHS",
-    type=click.Path(file_okay=True, dir_okay=False),
+         " printed on every individual label.",
+    cls=Condition,
+    pos_condition="generate_barcode",
 )
 @click.option(
     "--custom-layout",
-    required=True,
     prompt="Use custom layout instead of Avery Zweckform J4791?",
     is_flag=True,
     help="Whether a custom layout will be specified.",
+    cls=Condition,
+    pos_condition="generate_barcode",
 )
 @click.option(
     "--num_cols",
@@ -241,22 +181,84 @@ def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     cls=Condition,
     pos_condition="custom_layout",
 )
+@click.option(
+    "--generate-qr",
+    required=True,
+    prompt="Use CAR Watch app for study?",
+    is_flag=True,
+    help="Whether a qr code encoding the study data for configuring the CAR watch app should be generated.",
+)
+@click.option(
+    "--output_dir",
+    default=".",
+    prompt="Output directory for generated files",
+    help="Directory where generated files will be stored.",
+    envvar="PATHS",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+)
+@click.option(
+    "--output_name_label",
+    default="barcodes",
+    prompt="Name of label file",
+    help="Name of the generated label file.",
+    envvar="PATHS",
+    type=click.Path(file_okay=True, dir_okay=False),
+    cls=Condition,
+    pos_condition="generate_barcode",
+)
+@click.option(
+    "--output_name_qr",
+    default="qr_code",
+    prompt="Name of QR code file",
+    help="Name of the generated QR code file.",
+    envvar="PATHS",
+    type=click.Path(file_okay=True, dir_okay=False),
+    cls=Condition,
+    pos_condition="generate_qr",
+)
+@click.option(
+    "--saliva-distances",
+    default="15",
+    required=False,
+    prompt="Please specify duration between all saliva samples in minutes"
+           " (as number when constant, as comma-separated when varying from sample to sample)",
+    type=str,
+    help="The duration between saliva samples in minutes.",
+    callback=validate_saliva_distances,
+    cls=Condition,
+    pos_condition="generate_qr",
+)
+@click.option(
+    "--contact-email",
+    required=False,
+    prompt="Contact E-Mail Address that should receive CAR Watch app timestamps",
+    type=str,
+    help="The E-Mail Address that will be used as default when sharing data from CAR Watch app.",
+    callback=validate_mail_input,
+    cls=Condition,
+    pos_condition="generate_qr",
+)
 def run(
-    study_name: Optional[str] = None,
-    num_days: Optional[int] = None,
-    num_saliva_samples: Optional[int] = None,
-    subject_path: Optional[str] = None,
-    subject_column: Optional[str] = None,
-    num_subjects: Optional[int] = None,
-    has_subject_prefix: Optional[bool] = None,
-    subject_prefix: Optional[str] = None,
-    has_evening_salivette: Optional[bool] = None,
-    add_name: Optional[bool] = None,
-    has_barcode: Optional[bool] = None,
-    output_dir: Optional[str] = None,
-    output_name: Optional[str] = None,
-    custom_layout: Optional[bool] = None,
-    **kwargs
+        study_name: Optional[str] = None,
+        num_days: Optional[int] = None,
+        num_saliva_samples: Optional[int] = None,
+        subject_path: Optional[str] = None,
+        subject_column: Optional[str] = None,
+        num_subjects: Optional[int] = None,
+        has_subject_prefix: Optional[bool] = None,
+        subject_prefix: Optional[str] = None,
+        has_evening_salivette: Optional[bool] = None,
+        add_name: Optional[bool] = None,
+        has_barcode: Optional[bool] = None,
+        output_dir: Optional[str] = None,
+        generate_barcode: Optional[bool] = None,
+        generate_qr: Optional[bool] = None,
+        output_name_label: Optional[str] = None,
+        output_name_qr: Optional[str] = None,
+        custom_layout: Optional[bool] = None,
+        saliva_distances: Optional[str] = None,
+        contact_email: Optional[str] = None,
+        **kwargs
 ):
     done = False
 
@@ -271,6 +273,11 @@ def run(
 
     t = threading.Thread(target=animate)
     t.start()
+
+    if not generate_qr and not generate_barcode:
+        done = True
+        raise click.UsageError("Nothing to do, no output generated.")
+
     study = Study(
         study_name=study_name,
         num_days=num_days,
@@ -281,6 +288,20 @@ def run(
         subject_prefix=subject_prefix,
         has_evening_salivette=has_evening_salivette,
     )
+
+    if generate_barcode:
+        _generate_barcode(study, add_name, has_barcode, custom_layout, output_dir, output_name_label, **kwargs)
+    if generate_qr:
+        try:
+            _generate_qr_code(study, saliva_distances, contact_email, output_dir, output_name_qr)
+        except ValueError as e:
+            done = True
+            raise click.BadParameter(str(e))
+
+    done = True
+
+
+def _generate_barcode(study, add_name, has_barcode, custom_layout, output_dir, output_name_label, **kwargs):
     generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode)
     if custom_layout:
         layout = CustomLayout(
@@ -293,10 +314,25 @@ def run(
             inter_col=kwargs["inter_col"],
             inter_row=kwargs["inter_row"],
         )
-        generator.generate(output_dir=output_dir, output_name=output_name, layout=layout)
+        generator.generate(output_dir=output_dir, output_name=output_name_label, layout=layout)
     else:
-        generator.generate(output_dir=output_dir, output_name=output_name)
-    done = True
+        generator.generate(output_dir=output_dir, output_name=output_name_label)
+
+
+def _generate_qr_code(study, saliva_distances, contact_email, output_dir, output_name_qr):
+    saliva_distances = _parse_saliva_distances(saliva_distances, study.num_saliva_samples)
+    generator = QrCodeGenerator(study=study, saliva_distances=saliva_distances, contact_email=contact_email)
+    generator.generate(output_dir=output_dir, output_name=output_name_qr)
+
+
+def _parse_saliva_distances(saliva_distances: Union[Sequence[str], str], num_saliva_samples: int) -> Sequence[int]:
+    saliva_distances = saliva_distances.replace(" ", "")  # trim spaces
+    # list of int
+    if "," in saliva_distances:
+        saliva_distances = [eval(dist) for dist in saliva_distances.split(",")]
+        return saliva_distances
+    else:
+        return [int(saliva_distances)] * (num_saliva_samples - 1)
 
 
 if __name__ == "__main__":

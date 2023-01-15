@@ -9,7 +9,8 @@ import cairosvg
 import numpy as np
 
 from carwatch.labels.print_layout import AveryZweckformJ4791Layout, PrintLayout
-from carwatch.labels.utils import Study, _assert_is_dir, _tex_to_pdf, _write_to_file
+from carwatch.utils.utils import tex_to_pdf, write_to_file, assert_is_dir
+from carwatch.utils.study import Study
 
 
 class LabelGenerator:
@@ -57,7 +58,8 @@ class LabelGenerator:
         Examples
         --------
         Create a Study and print labels for a custom layout
-        >>> from carwatch.labels import LabelGenerator, Study, CustomLayout
+        >>> from carwatch.labels import LabelGenerator, CustomLayout
+        >>> from carwatch.utils import Study
         >>> Study(
         >>>     study_name="ExampleStudy", num_days=3, num_subjects=4, num_saliva_samples=5, has_evening_salivette=True
         >>> )
@@ -80,11 +82,11 @@ class LabelGenerator:
         self.barcode_ids = None
 
     def generate(
-        self,
-        output_dir: str = ".",
-        output_name: Union[str, None] = None,
-        layout: PrintLayout = AveryZweckformJ4791Layout(),
-        debug=False,
+            self,
+            output_dir: str = ".",
+            output_name: Union[str, None] = None,
+            layout: PrintLayout = AveryZweckformJ4791Layout(),
+            debug=False,
     ):
         """Generate a `*.pdf` file with labels according to the properties of the created ``LabelGenerator``.
 
@@ -104,7 +106,7 @@ class LabelGenerator:
         """
         output_dir = Path(output_dir)
         try:
-            _assert_is_dir(output_dir)
+            assert_is_dir(output_dir)
         except ValueError as e:
             print(e)
             sys.exit(1)
@@ -120,7 +122,7 @@ class LabelGenerator:
         self.barcode_paths = self._export_barcodes_to_pdf()
         self._generate_tex_file(debug=debug)
         try:
-            _tex_to_pdf(self.output_dir, self.output_name + ".tex")
+            tex_to_pdf(self.output_dir, self.output_name + ".tex")
         except RuntimeError as e:
             print(e)
         self._clear_intermediate_results(delete_img_dir=True, debug=debug)
@@ -220,15 +222,15 @@ class LabelGenerator:
         # copy tex template to output dir
         # use pkg_resources to find the template indepentently from cwd
         template = pkg_resources.read_text(labels, "barcode_template.tex")
-        _write_to_file(self.output_dir.joinpath(self.output_name + ".tex"), template)
+        write_to_file(self.output_dir.joinpath(self.output_name + ".tex"), template)
 
         # write generated properties to output dir
         property_str = self._generate_tex_label_properties(debug)
-        _write_to_file(self.output_dir.joinpath("properties.tex"), property_str)
+        write_to_file(self.output_dir.joinpath("properties.tex"), property_str)
 
         # write generated body to output dir
         body_str = self._generate_tex_body()
-        _write_to_file(self.output_dir.joinpath("body.tex"), body_str)
+        write_to_file(self.output_dir.joinpath("body.tex"), body_str)
 
     def _generate_label_tex(self, barcode_id: int):
         """Generate LaTeX code for a certain label.
@@ -249,9 +251,7 @@ class LabelGenerator:
         subject_name = f"{subject:0{subject_name_padding}d}"
         if self.study.subject_path:
             # subject has a certain identifier and not just a number
-            subject_name = self.study.subject_ids[subject - 1]
-        if self.study.subject_prefix:
-            subject_name = f"{self.study.subject_prefix}{subject_name}"
+            subject_name = self.study.subject_names[subject - 1]
         # label is realized with latex table
         label_head = r"\genericlabel" + "\n" + r"\begin{tabular}"
         label_foot = r"\end{tabular}" + "\n\n"
@@ -261,8 +261,8 @@ class LabelGenerator:
             table_properties = r"{m{0.45\linewidth} m{0.4\linewidth}}" + "\n"
             # add barcode to first column
             table_content += (
-                rf"\includegraphics[height={self.layout.get_label_height() - 4}mm,width="
-                + rf"\linewidth,keepaspectratio]{{img/barcode_{subject:03d}{day:02d}{sample:02d}.pdf}} &"
+                    rf"\includegraphics[height={self.layout.get_label_height() - 4}mm,width="
+                    + rf"\linewidth,keepaspectratio]{{img/barcode_{subject:03d}{day:02d}{sample:02d}.pdf}} &"
             )
             font_size = r"\tiny"  # decrease font size to make it fit next to barcode
         else:
@@ -284,9 +284,9 @@ class LabelGenerator:
             if self.has_barcode:
                 # insert infos as one row in the second column
                 table_content += (
-                    rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}"
-                    + rf"\newline T{day}\_S{sample}}}"
-                    + "\n"
+                        rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}"
+                        + rf"\newline T{day}\_S{sample}}}"
+                        + "\n"
                 )
             else:
                 # insert infos centered in two rows
@@ -296,7 +296,7 @@ class LabelGenerator:
                     )
                 else:
                     table_content += (
-                        rf"{font_size}{{{self.study.study_name}\_{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
+                            rf"{font_size}{{{self.study.study_name}\_{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
                     )
         else:
             # add day and sample to second column

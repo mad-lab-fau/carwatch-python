@@ -1,3 +1,8 @@
+carwatch/examples/*.tex
+carwatch/examples/*.pdf
+carwatch/examples/*.png
+
+poetry.lock
 
 # Created by https://www.toptal.com/developers/gitignore/api/jupyternotebooks,linux,macos,python,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=jupyternotebooks,linux,macos,python,windows
@@ -249,3 +254,4 @@ $RECYCLE.BIN/
 
 # Ignore Output files
 *.pdf
+/carwatch/examples/properties.tex

@@ -1,0 +1,1 @@
+from carwatch.qr_codes.study_qr_generator import QrCodeGenerator
