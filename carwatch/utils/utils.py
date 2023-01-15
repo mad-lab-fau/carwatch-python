@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from subprocess import check_call
 from typing import Optional, Union, Sequence
+import warnings
 
 
 def assert_is_dir(path: Path) -> Optional[bool]:
@@ -139,4 +140,27 @@ def sanitize_str_for_tex(string: str) -> str:
         string = string.replace(c, rf"\{c}")
     for c, val in replace_chars.items():
         string = string.replace(c, f"{val}")
+    return string
+
+
+def sanitize_str_for_qr(string: str, forbidden_chars: Sequence[str]) -> str:
+    r"""Remove special characters in a string to prevent parsing problems when reading the data.
+
+    Parameters
+    ----------
+    string : str
+        an arbitrary unescaped string
+    forbidden_chars : list
+        characters that will be removed from the string
+
+    Returns
+    -------
+    str
+        Sanitized version of ``string`` with all forbidden characters removed
+
+    """
+    for c in forbidden_chars:
+        if c in string:
+            warnings.warn(f"Forbidden symbol `{c}` detected in input `{string}`, will be removed.")
+        string = string.replace(c, "")
     return string

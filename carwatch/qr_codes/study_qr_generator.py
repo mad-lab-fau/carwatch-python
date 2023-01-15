@@ -4,7 +4,7 @@ from typing import Sequence, Union
 import qrcode
 
 from carwatch.utils.study import Study
-from carwatch.utils.utils import assert_is_dir
+from carwatch.utils.utils import assert_is_dir, sanitize_str_for_qr
 
 
 class QrCodeGenerator:
@@ -13,22 +13,23 @@ class QrCodeGenerator:
     participants to allow them configuring `_CAR Watch_` app on their personal devices.
     """
 
-    def __init__(self, study: Study, saliva_distances: Sequence[int], contact_email: str):
+    def __init__(self, study: Study, saliva_distances: Union[int, Sequence[int]], contact_email: str):
         """Generate QR-Code encoding all relevant study information encoded
 
         Parameters
         ----------
         study: :obj:`~carwatch.utils.Study`
            Study object for which QR-Code will be created
-        saliva_distances: list
-            Time distances between morning saliva samples in chronological order.
+        saliva_distances: int or list
+            Time distances between morning saliva samples in minutes ordered chronologically.
             For s saliva samples, s-1 saliva distances need to be specified.
+            If the distances are constant between all morning samples,
         contact_email: str
             E-mail address that App log data will be shared with
 
         """
         self.study = study
-        self.saliva_distances = saliva_distances
+        self.saliva_distances = self._sanitize_distances(saliva_distances)
         self.contact = contact_email
         self.output_dir = None
         self.output_name = f"qr_code_{self.study.study_name}"
@@ -69,17 +70,47 @@ class QrCodeGenerator:
 
         """
 
+        # sanitize inputs to prevent decoding issues
+        forbidden = [";", ":", ","]
+        study_name = sanitize_str_for_qr(self.study.study_name, forbidden)
+        subject_names = []
+        for name in self.study.subject_names:
+            sanitized_name = sanitize_str_for_qr(name, forbidden)
+            subject_names.append(sanitized_name)
+
         app_id = "CARWATCH"
+        name_string = ",".join(str(dist) for dist in subject_names)
+        distance_string = ",".join(str(dist) for dist in self.saliva_distances)
+
+        # create encoding
         data = f"{app_id};" \
-               f"N:{self.study.study_name};" \
+               f"N:{study_name};" \
                f"D:{self.study.num_days};" \
-               f"S:{self.study.subject_names};" \
-               f"T:{self.saliva_distances};" \
-               f"E:{self.study.has_evening_salivette};" \
+               f"S:{name_string};" \
+               f"T:{distance_string};" \
+               f"E:{int(self.study.has_evening_salivette)};" \
                f"M:{self.contact}"
+
+        # create qr code
         img = qrcode.make(data)
         return img
 
     def _save_qr_img(self, qr_img):
         img_location = self.output_dir.joinpath(f"{self.output_name}.png")
         qr_img.save(img_location)
+
+    def _sanitize_distances(self, saliva_distances: Union[int, Sequence[int]]) -> Sequence[int]:
+        if isinstance(saliva_distances, int):
+            return [saliva_distances] * self.study.num_saliva_samples
+        if isinstance(saliva_distances, list):
+            # all elements are ints
+            if all(isinstance(dist, int) for dist in saliva_distances):
+                # length is correct
+                if len(saliva_distances) is self.study.num_saliva_samples - 1:
+                    return saliva_distances
+                raise ValueError(
+                    f"Incorrect number of saliva distances provided! "
+                    f"Needs to be {self.study.num_saliva_samples - 1}, as "
+                    f"{self.study.num_saliva_samples} morning samples will be taken.")
+            raise ValueError("Invalid data detected in saliva distances! All values need to be integers!")
+        raise ValueError("Saliva distances data type is invalid! Needs to be int or list of ints.")
