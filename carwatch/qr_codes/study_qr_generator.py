@@ -21,8 +21,8 @@ class QrCodeGenerator:
         study: :obj:`~carwatch.utils.Study`
            Study object for which QR-Code will be created
         saliva_distances: int or list
-            Time distances between morning saliva samples in minutes ordered chronologically.
-            For s saliva samples, s-1 saliva distances need to be specified.
+            Time distances between morning samples in minutes ordered chronologically.
+            For s morning saliva samples, s-1 saliva distances need to be specified.
             If the distances are constant between all morning samples,
         contact_email: str
             E-mail address that App log data will be shared with
@@ -66,7 +66,7 @@ class QrCodeGenerator:
     def _generate_qr_code(self):
         """Translate study data into  a QR-Code in the following format:
 
-        ``CARWATCH;N:<study_name>;D:<num_days>;S:<subject_list>;T:<saliva_distances>;E:<has_evening_salivette>;M:<contact_email>``
+        ``CARWATCH;N:<study_name>;D:<num_days>;S:<subject_list>;T:<saliva_distances>;E:<has_evening_sample>;M:<contact_email>``
 
         """
 
@@ -88,7 +88,7 @@ class QrCodeGenerator:
                f"D:{self.study.num_days};" \
                f"S:{name_string};" \
                f"T:{distance_string};" \
-               f"E:{int(self.study.has_evening_salivette)};" \
+               f"E:{int(self.study.has_evening_sample)};" \
                f"M:{self.contact}"
 
         # create qr code
@@ -101,21 +101,21 @@ class QrCodeGenerator:
 
     def _sanitize_distances(self, saliva_distances: Union[int, Sequence[int]]) -> Sequence[int]:
         if isinstance(saliva_distances, int):
-            return [saliva_distances] * self.study.num_saliva_samples
+            return [saliva_distances] * self.study.num_samples
         if isinstance(saliva_distances, list):
             # all elements are ints
             if all(isinstance(dist, int) for dist in saliva_distances):
                 # required number of saliva distances
-                num_distances = self.study.num_saliva_samples - 1
-                if self.study.has_evening_salivette:
-                    # evening salivette counts into total number of distances
+                num_distances = self.study.num_samples - 1
+                if self.study.has_evening_sample:
+                    # evening sample counts into total number of distances
                     num_distances = num_distances - 1
                 # length is correct
                 if len(saliva_distances) == num_distances:
                     return saliva_distances
                 raise ValueError(
                     f"Incorrect number of saliva distances provided! "
-                    f"Needs to be {self.study.num_saliva_samples - 1}, as "
-                    f"{self.study.num_saliva_samples} morning samples will be taken.")
+                    f"Needs to be {self.study.num_samples - 1}, as "
+                    f"{self.study.num_samples} morning samples will be taken.")
             raise ValueError("Invalid data detected in saliva distances! All values need to be integers!")
         raise ValueError("Saliva distances data type is invalid! Needs to be int or list of ints.")

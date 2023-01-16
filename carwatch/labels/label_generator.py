@@ -14,7 +14,8 @@ from carwatch.utils.study import Study
 
 
 class LabelGenerator:
-    """Class that is used to generate printable `*.pdf` files with labels for all saliva samples taken within a study.
+    """Class that is used to generate printable `*.pdf` files with labels for all saliva samples
+     (or other biomarker swabs) taken within a study.
 
     Tested for labels of type `_Avery Zweckform J4791_` (48 labels per A4-sheet) and only intended to be used for print
     labels in A4 format. Note that for smaller labels, text overflows might occur.
@@ -29,7 +30,7 @@ class LabelGenerator:
         If the parameter ``add_name`` is ``True`` then the text next to the barcode will have the following layout:
         ```
         <study_name>_<subject_id>
-        T<day>_S<saliva_id or A for evening sample>
+        T<day>_<sample_prefix><sample_id or A for evening sample>
         ```
         For example:
         ```
@@ -39,7 +40,7 @@ class LabelGenerator:
 
         If ``add_name`` is set to ``False`` then only the second line is printed:
         ```
-        T<day>_S<saliva_id or A for evening sample>
+        T<day>_<sample_prefix><sample_id or A for evening sample>
         ```
         For example:
         ```
@@ -54,6 +55,8 @@ class LabelGenerator:
             Whether a barcode of type `EAN-8` will be printed on each label
         add_name: bool, optional
             Whether the name of the study will be printed on each label
+        sample_prefix: str, optional
+            Abbreviation of the type of sample taken, default is ``'S'`` for 'Saliva'
 
         Examples
         --------
@@ -61,7 +64,7 @@ class LabelGenerator:
         >>> from carwatch.labels import LabelGenerator, CustomLayout
         >>> from carwatch.utils import Study
         >>> Study(
-        >>>     study_name="ExampleStudy", num_days=3, num_subjects=4, num_saliva_samples=5, has_evening_salivette=True
+        >>>     study_name="ExampleStudy", num_days=3, num_subjects=4, num_samples=5, has_evening_sample=True
         >>> )
         >>> generator = LabelGenerator(study=study, add_name=True, has_barcode=True)
         >>> layout = CustomLayout(
@@ -135,7 +138,7 @@ class LabelGenerator:
 
             `pppddss`
 
-        where p is the participant id, d is the study day, and s is the number of the saliva sample of that day.
+        where p is the participant id, d is the study day, and s is the number of the sample of that day.
 
         Returns
         -------
@@ -149,7 +152,7 @@ class LabelGenerator:
         barcode_ids = [
             f"{subj:03d}{day:02d}{saliv:02d}"
             for subj, day, saliv in list(
-                product(self.study.subject_indices, self.study.day_indices, self.study.saliva_indices)
+                product(self.study.subject_indices, self.study.day_indices, self.study.sample_indices)
             )
         ]
         # sort the ids
@@ -242,7 +245,7 @@ class LabelGenerator:
         ----------
         barcode_id: int
             8-digit number of the respective barcode with the format `cpppddss`
-            with c: check digit, p: participant id, d: study day, s: saliva sample
+            with c: check digit, p: participant id, d: study day, s: biomarker sample
 
         """
         day = int(barcode_id // 100) % 100
@@ -273,10 +276,10 @@ class LabelGenerator:
             # center text in label
             label_head = r"\genericlabel" + "\n" + r"\begin{center}" + "\n" + r"\begin{tabular}"
             label_foot = r"\end{tabular}" + "\n" + r"\end{center}" + "\n\n"
-        if self.study.has_evening_salivette:
-            # if last sample of the day is evening salivette, it is marked as "TA"
-            if (all([sample == self.study.num_saliva_samples, not self.study.start_saliva_from_zero]) or
-                    all([sample == self.study.num_saliva_samples - 1, self.study.start_saliva_from_zero])):
+        if self.study.has_evening_sample:
+            # if last sample of the day is evening sample, it is marked with "A"
+            if (all([sample == self.study.num_samples, not self.study.start_sample_from_zero]) or
+                    all([sample == self.study.num_samples - 1, self.study.start_sample_from_zero])):
                 sample = "A"
         if self.add_name:
             delimiter = r"\_"
