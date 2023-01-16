@@ -272,9 +272,11 @@ class LabelGenerator:
             # center text in label
             label_head = r"\genericlabel" + "\n" + r"\begin{center}" + "\n" + r"\begin{tabular}"
             label_foot = r"\end{tabular}" + "\n" + r"\end{center}" + "\n\n"
-        if all([sample == self.study.num_saliva_samples, self.study.has_evening_salivette]):
+        if self.study.has_evening_salivette:
             # if last sample of the day is evening salivette, it is marked as "TA"
-            sample = "A"
+            if (all([sample == self.study.num_saliva_samples, not self.study.start_saliva_from_zero]) or
+                    all([sample == self.study.num_saliva_samples - 1, self.study.start_saliva_from_zero])):
+                sample = "A"
         if self.add_name:
             delimiter = r"\_"
             if len(self.study.study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:

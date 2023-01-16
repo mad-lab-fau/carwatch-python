@@ -26,6 +26,13 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     help="The daily number of saliva samples taken from every participant.",
 )
 @click.option(
+    "--saliva_start_id",
+    required=True,
+    default=0,
+    prompt="Should saliva IDs start at 0 or at 1 (i.e., S0 vs. S1)?",
+    type=click.IntRange(0, 1),
+)
+@click.option(
     "--subject-data",
     required=True,
     prompt="Read subject IDs from file?",
@@ -242,6 +249,7 @@ def run(
         study_name: Optional[str] = None,
         num_days: Optional[int] = None,
         num_saliva_samples: Optional[int] = None,
+        saliva_start_id: Optional[int] = None,
         subject_path: Optional[str] = None,
         subject_column: Optional[str] = None,
         num_subjects: Optional[int] = None,
@@ -278,10 +286,13 @@ def run(
         done = True
         raise click.UsageError("Nothing to do, no output generated.")
 
+    start_saliva_from_zero = True if saliva_start_id == 0 else False
+
     study = Study(
         study_name=study_name,
         num_days=num_days,
         num_saliva_samples=num_saliva_samples,
+        start_saliva_from_zero=start_saliva_from_zero,
         num_subjects=num_subjects,
         subject_path=subject_path,
         subject_column=subject_column,
