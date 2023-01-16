@@ -19,6 +19,14 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     "--num-days", required=True, prompt="Duration of study [days]", type=int, help="The duration of your study in days."
 )
 @click.option(
+    "--sample_prefix",
+    required=True,
+    default="S",
+    prompt="Prefix for your type of biomarker (e.g., S for saliva)",
+    type=str,
+    help="The prefix for the biomarker type of the collected samples.",
+)
+@click.option(
     "--num-saliva-samples",
     required=True,
     prompt="Number of saliva samples [per day]",
@@ -246,6 +254,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     pos_condition="generate_qr",
 )
 def run(
+        sample_prefix: Optional[str] = None,
         study_name: Optional[str] = None,
         num_days: Optional[int] = None,
         num_saliva_samples: Optional[int] = None,
@@ -312,8 +321,9 @@ def run(
     done = True
 
 
-def _generate_barcode(study, add_name, has_barcode, custom_layout, output_dir, output_name_label, **kwargs):
-    generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode)
+def _generate_barcode(study, add_name, has_barcode, sample_prefix, custom_layout, output_dir, output_name_label,
+                      **kwargs):
+    generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode, sample_prefix=sample_prefix)
     if custom_layout:
         layout = CustomLayout(
             num_cols=kwargs["num_cols"],

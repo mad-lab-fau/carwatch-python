@@ -9,7 +9,7 @@ import cairosvg
 import numpy as np
 
 from carwatch.labels.print_layout import AveryZweckformJ4791Layout, PrintLayout
-from carwatch.utils.utils import tex_to_pdf, write_to_file, assert_is_dir
+from carwatch.utils.utils import tex_to_pdf, write_to_file, assert_is_dir, sanitize_str_for_tex
 from carwatch.utils.study import Study
 
 
@@ -23,8 +23,8 @@ class LabelGenerator:
     EAN8 = barcode.get_barcode_class("ean8")
     MAX_NAME_LEN = 12
 
-    def __init__(self, study: Study, has_barcode: bool = False, add_name: bool = False):
-        """Generate printable PDF files with labels for all saliva samples taken within a study.
+    def __init__(self, study: Study, has_barcode: bool = False, add_name: bool = False, sample_prefix: str = "S"):
+        """Generate printable PDF files with labels for all biomarker samples taken within a study.
 
         If the parameter ``add_name`` is ``True`` then the text next to the barcode will have the following layout:
         ```
@@ -74,6 +74,7 @@ class LabelGenerator:
         self.study = study
         self.has_barcode = has_barcode
         self.add_name = add_name
+        self.sample_prefix = sanitize_str_for_tex(sample_prefix)
         self.output_dir = None
         self.output_name = f"barcodes_{self.study.study_name}"
         self.layout = None
@@ -287,22 +288,22 @@ class LabelGenerator:
                 # insert infos as one row in the second column
                 table_content += (
                         rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}"
-                        + rf"\newline T{day}\_S{sample}}}"
+                        + rf"\newline T{day}\_{self.sample_prefix}{sample}}}"
                         + "\n"
                 )
             else:
                 # insert infos centered in two rows
                 if len(self.study.study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
                     table_content += (
-                            rf"{font_size}{{{self.study.study_name}}}\\{{{subject_name}\_T{day}\_S{sample}}}" + "\n"
+                            rf"{font_size}{{{self.study.study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample}}}" + "\n"
                     )
                 else:
                     table_content += (
-                            rf"{font_size}{{{self.study.study_name}\_{subject_name}}}\\{{T{day}\_S{sample}}}" + "\n"
+                            rf"{font_size}{{{self.study.study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample}}}" + "\n"
                     )
         else:
             # add day and sample to second column
-            table_content += rf"\centering{font_size}{{T{day}\_S{sample}}}" + "\n"
+            table_content += rf"\centering{font_size}{{T{day}\_{self.sample_prefix}{sample}}}" + "\n"
         label_tex = label_head + table_properties + table_content + label_foot
         return label_tex
 
