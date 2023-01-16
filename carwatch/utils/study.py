@@ -70,7 +70,7 @@ class Study:
             subject_prefix = sanitize_str_for_tex(subject_prefix)
         self.subject_prefix = subject_prefix
         self.has_evening_salivette = has_evening_salivette
-        self.start_from_zero = start_saliva_from_zero
+        self.start_saliva_from_zero = start_saliva_from_zero
 
     @staticmethod
     def _determine_subject_ids(subject_path: Union[str, Path], subject_column: str) -> Optional[Sequence[str]]:
@@ -122,7 +122,7 @@ class Study:
 
     @property
     def saliva_indices(self):
-        if self.start_from_zero:
+        if self.start_saliva_from_zero:
             return list(range(0, self.num_saliva_samples))
         else:
             return list(range(1, self.num_saliva_samples + 1))
