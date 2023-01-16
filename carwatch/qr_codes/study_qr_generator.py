@@ -105,8 +105,13 @@ class QrCodeGenerator:
         if isinstance(saliva_distances, list):
             # all elements are ints
             if all(isinstance(dist, int) for dist in saliva_distances):
+                # required number of saliva distances
+                num_distances = self.study.num_saliva_samples - 1
+                if self.study.has_evening_salivette:
+                    # evening salivette counts into total number of distances
+                    num_distances = num_distances - 1
                 # length is correct
-                if len(saliva_distances) is self.study.num_saliva_samples - 1:
+                if len(saliva_distances) == num_distances:
                     return saliva_distances
                 raise ValueError(
                     f"Incorrect number of saliva distances provided! "
