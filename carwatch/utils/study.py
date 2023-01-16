@@ -16,13 +16,13 @@ class Study:
             self,
             study_name: str,
             num_days: int,
-            num_saliva_samples: int,
+            num_samples: int,
             num_subjects: Optional[int] = None,
             subject_path: Optional[Union[str, Path]] = None,
             subject_column: Optional[str] = "subject",
             subject_prefix: Optional[str] = None,
-            has_evening_salivette: bool = False,
-            start_saliva_from_zero: bool = False
+            has_evening_sample: bool = False,
+            start_sample_from_zero: bool = False
     ):
         """Class that represents a study.
 
@@ -32,8 +32,8 @@ class Study:
             Study name that will be printed on the labels
         num_days: int
             Number of days the study will be conducted
-        num_saliva_samples: int
-            *Total* number of saliva samples per day (including a potential evening sample!)
+        num_samples: int
+            *Total* number of biomarker samples per day (including a potential evening sample!)
         num_subjects: int, optional
             Number of subjects in the study
         subject_path: str or :class:`~pathlib.Path`, optional
@@ -43,16 +43,16 @@ class Study:
             default value is ``"subject"``.
         subject_prefix: str, optional
             Add prefix to participant number (e.g., "VP_")
-        has_evening_salivette: bool, optional
-            Whether a saliva sample in the evening is also collected, default is ``False``
-        start_saliva_from_zero: bool, optional
-            Whether the ID of the first saliva sample is 0, default is ``False``
+        has_evening_sample: bool, optional
+            Whether a biomarker sample in the evening is also collected, default is ``False``
+        start_sample_from_zero: bool, optional
+            Whether the ID of the first biomarker sample is 0, default is ``False``
             When set to ``False``, ID starts from 1
 
         """
         self.study_name = sanitize_str_for_tex(study_name)
         self.num_days = num_days
-        self.num_saliva_samples = num_saliva_samples
+        self.num_samples = num_samples
         self.subject_path = subject_path
         if self.subject_path:
             self.subject_ids = self._determine_subject_ids(subject_path, subject_column)
@@ -69,8 +69,8 @@ class Study:
         if subject_prefix:
             subject_prefix = sanitize_str_for_tex(subject_prefix)
         self.subject_prefix = subject_prefix
-        self.has_evening_salivette = has_evening_salivette
-        self.start_saliva_from_zero = start_saliva_from_zero
+        self.has_evening_sample = has_evening_sample
+        self.start_sample_from_zero = start_sample_from_zero
 
     @staticmethod
     def _determine_subject_ids(subject_path: Union[str, Path], subject_column: str) -> Optional[Sequence[str]]:
@@ -121,8 +121,8 @@ class Study:
         return list(range(1, self.num_days + 1))
 
     @property
-    def saliva_indices(self):
-        if self.start_saliva_from_zero:
-            return list(range(0, self.num_saliva_samples))
+    def sample_indices(self):
+        if self.start_sample_from_zero:
+            return list(range(0, self.num_samples))
         else:
-            return list(range(1, self.num_saliva_samples + 1))
+            return list(range(1, self.num_samples + 1))

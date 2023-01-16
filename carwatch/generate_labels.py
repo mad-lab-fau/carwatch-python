@@ -19,17 +19,25 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     "--num-days", required=True, prompt="Duration of study [days]", type=int, help="The duration of your study in days."
 )
 @click.option(
-    "--num-saliva-samples",
+    "--sample_prefix",
     required=True,
-    prompt="Number of saliva samples [per day]",
-    type=int,
-    help="The daily number of saliva samples taken from every participant.",
+    default="S",
+    prompt="Prefix for your type of biomarker (e.g., S for saliva)",
+    type=str,
+    help="The prefix for the biomarker type of the collected samples.",
 )
 @click.option(
-    "--saliva_start_id",
+    "--num-samples",
+    required=True,
+    prompt="Number of biomarker samples [per day]",
+    type=int,
+    help="The daily number of biomarker samples taken from every participant.",
+)
+@click.option(
+    "--sample_start_id",
     required=True,
     default=0,
-    prompt="Should saliva IDs start at 0 or at 1 (i.e., S0 vs. S1)?",
+    prompt="Should biomarker IDs start at 0 or at 1 (i.e., S0 vs. S1)?",
     type=click.IntRange(0, 1),
 )
 @click.option(
@@ -86,18 +94,18 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     pos_condition="has_subject_prefix",
 )
 @click.option(
-    "--has-evening-salivette",
+    "--has-evening-sample",
     required=True,
-    prompt="Evening salivette?",
+    prompt="Evening sample taken?",
     is_flag=True,
-    help="Whether a saliva sample is taken in the evening.",
+    help="Whether a biomarker sample is taken in the evening.",
 )
 @click.option(
     "--generate-barcode",
     required=True,
     prompt="Generate printable labels for study?",
     is_flag=True,
-    help="Whether a PDF with barcodes encoding the information for individual saliva samples should be generated.",
+    help="Whether a PDF with barcodes encoding the information for individual biomarker samples should be generated.",
 )
 @click.option(
     "--add-name",
@@ -111,7 +119,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     "--has-barcode",
     prompt="Add barcode to label?",
     is_flag=True,
-    help="Whether a barcode encoding the participant id, day of study, and number of saliva sample will be"
+    help="Whether a barcode encoding the participant id, day of study, and number of biomarker sample will be"
          " printed on every individual label.",
     cls=Condition,
     pos_condition="generate_barcode",
@@ -246,16 +254,17 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     pos_condition="generate_qr",
 )
 def run(
+        sample_prefix: Optional[str] = None,
         study_name: Optional[str] = None,
         num_days: Optional[int] = None,
-        num_saliva_samples: Optional[int] = None,
-        saliva_start_id: Optional[int] = None,
+        num_samples: Optional[int] = None,
+        sample_start_id: Optional[int] = None,
         subject_path: Optional[str] = None,
         subject_column: Optional[str] = None,
         num_subjects: Optional[int] = None,
         has_subject_prefix: Optional[bool] = None,
         subject_prefix: Optional[str] = None,
-        has_evening_salivette: Optional[bool] = None,
+        has_evening_sample: Optional[bool] = None,
         add_name: Optional[bool] = None,
         has_barcode: Optional[bool] = None,
         output_dir: Optional[str] = None,
@@ -286,22 +295,23 @@ def run(
         done = True
         raise click.UsageError("Nothing to do, no output generated.")
 
-    start_saliva_from_zero = True if saliva_start_id == 0 else False
+    start_sample_from_zero = True if sample_start_id == 0 else False
 
     study = Study(
         study_name=study_name,
         num_days=num_days,
-        num_saliva_samples=num_saliva_samples,
-        start_saliva_from_zero=start_saliva_from_zero,
+        num_samples=num_samples,
+        start_sample_from_zero=start_sample_from_zero,
         num_subjects=num_subjects,
         subject_path=subject_path,
         subject_column=subject_column,
         subject_prefix=subject_prefix,
-        has_evening_salivette=has_evening_salivette,
+        has_evening_sample=has_evening_sample,
     )
 
     if generate_barcode:
-        _generate_barcode(study, add_name, has_barcode, custom_layout, output_dir, output_name_label, **kwargs)
+        _generate_barcode(study, add_name, has_barcode, sample_prefix, custom_layout, output_dir, output_name_label,
+                          **kwargs)
     if generate_qr:
         try:
             _generate_qr_code(study, saliva_distances, contact_email, output_dir, output_name_qr)
@@ -312,8 +322,9 @@ def run(
     done = True
 
 
-def _generate_barcode(study, add_name, has_barcode, custom_layout, output_dir, output_name_label, **kwargs):
-    generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode)
+def _generate_barcode(study, add_name, has_barcode, sample_prefix, custom_layout, output_dir, output_name_label,
+                      **kwargs):
+    generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode, sample_prefix=sample_prefix)
     if custom_layout:
         layout = CustomLayout(
             num_cols=kwargs["num_cols"],
@@ -331,7 +342,7 @@ def _generate_barcode(study, add_name, has_barcode, custom_layout, output_dir, o
 
 
 def _generate_qr_code(study, saliva_distances, contact_email, output_dir, output_name_qr):
-    saliva_distances = _parse_saliva_distances(saliva_distances, study.num_saliva_samples)
+    saliva_distances = _parse_saliva_distances(saliva_distances, study.num_samples)
     generator = QrCodeGenerator(study=study, saliva_distances=saliva_distances, contact_email=contact_email)
     generator.generate(output_dir=output_dir, output_name=output_name_qr)
 
