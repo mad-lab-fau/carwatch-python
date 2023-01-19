@@ -342,19 +342,20 @@ def _generate_barcode(study, add_name, has_barcode, sample_prefix, custom_layout
 
 
 def _generate_qr_code(study, saliva_distances, contact_email, output_dir, output_name_qr):
-    saliva_distances = _parse_saliva_distances(saliva_distances, study.num_samples)
+    saliva_distances = _parse_saliva_distances(saliva_distances)
     generator = QrCodeGenerator(study=study, saliva_distances=saliva_distances, contact_email=contact_email)
     generator.generate(output_dir=output_dir, output_name=output_name_qr)
 
 
-def _parse_saliva_distances(saliva_distances: Union[Sequence[str], str], num_saliva_samples: int) -> Sequence[int]:
+def _parse_saliva_distances(saliva_distances: Union[Sequence[str], str]) -> Union[
+    int, Sequence[int]]:
     saliva_distances = saliva_distances.replace(" ", "")  # trim spaces
     # list of int
     if "," in saliva_distances:
         saliva_distances = [eval(dist) for dist in saliva_distances.split(",")]
         return saliva_distances
     else:
-        return [int(saliva_distances)] * (num_saliva_samples - 1)
+        return int(saliva_distances)
 
 
 if __name__ == "__main__":

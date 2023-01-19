@@ -100,22 +100,22 @@ class QrCodeGenerator:
         qr_img.save(img_location)
 
     def _sanitize_distances(self, saliva_distances: Union[int, Sequence[int]]) -> Sequence[int]:
+        # required number of saliva distances
+        num_morning_samples = self.study.num_samples
+        if self.study.has_evening_sample:
+            # evening sample counts into total number of distances
+            num_morning_samples = num_morning_samples - 1
         if isinstance(saliva_distances, int):
-            return [saliva_distances] * self.study.num_samples
+            return [saliva_distances] * (num_morning_samples - 1)
         if isinstance(saliva_distances, list):
             # all elements are ints
             if all(isinstance(dist, int) for dist in saliva_distances):
-                # required number of saliva distances
-                num_distances = self.study.num_samples - 1
-                if self.study.has_evening_sample:
-                    # evening sample counts into total number of distances
-                    num_distances = num_distances - 1
                 # length is correct
-                if len(saliva_distances) == num_distances:
+                if len(saliva_distances) == num_morning_samples - 1:
                     return saliva_distances
                 raise ValueError(
                     f"Incorrect number of saliva distances provided! "
-                    f"Needs to be {self.study.num_samples - 1}, as "
-                    f"{self.study.num_samples} morning samples will be taken.")
+                    f"Needs to be {num_morning_samples - 1}, as "
+                    f"{num_morning_samples} morning samples will be taken.")
             raise ValueError("Invalid data detected in saliva distances! All values need to be integers!")
         raise ValueError("Saliva distances data type is invalid! Needs to be int or list of ints.")
