@@ -250,10 +250,11 @@ class LabelGenerator:
         """
         study_name = sanitize_str_for_tex(self.study.study_name)
         day = int(barcode_id // 100) % 100
+        sample = barcode_id % 100
         if self.study.start_sample_from_zero:
-            sample = barcode_id % 100
+            sample_name = barcode_id % 100
         else:
-            sample = (barcode_id + 1) % 100
+            sample_name = (barcode_id + 1) % 100
         subject = int(barcode_id // 1e4)
         subject_name_padding = len(str(self.study.num_subjects))  # length of zero-padding depending on subject count
         subject_name = f"{subject:0{subject_name_padding}d}"
@@ -282,9 +283,8 @@ class LabelGenerator:
             label_foot = r"\end{tabular}" + "\n" + r"\end{center}" + "\n\n"
         if self.study.has_evening_sample:
             # if last sample of the day is evening sample, it is marked with "A"
-            if (all([sample == self.study.num_samples, not self.study.start_sample_from_zero]) or
-                    all([sample == self.study.num_samples - 1, self.study.start_sample_from_zero])):
-                sample = "A"
+            if all([sample == self.study.num_samples - 1]):
+                sample_name = "A"
         if self.add_name:
             delimiter = r"\_"
             if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
@@ -295,22 +295,22 @@ class LabelGenerator:
                 # insert infos as one row in the second column
                 table_content += (
                         rf"{font_size}{{{study_name}{delimiter}{subject_name}"
-                        + rf"\newline T{day}\_{self.sample_prefix}{sample}}}"
+                        + rf"\newline T{day}\_{self.sample_prefix}{sample_name}}}"
                         + "\n"
                 )
             else:
                 # insert infos centered in two rows
                 if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
                     table_content += (
-                            rf"{font_size}{{{study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample}}}" + "\n"
+                            rf"{font_size}{{{study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample_name}}}" + "\n"
                     )
                 else:
                     table_content += (
-                            rf"{font_size}{{{study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample}}}" + "\n"
+                            rf"{font_size}{{{study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample_name}}}" + "\n"
                     )
         else:
             # add day and sample to second column
-            table_content += rf"\centering{font_size}{{T{day}\_{self.sample_prefix}{sample}}}" + "\n"
+            table_content += rf"\centering{font_size}{{T{day}\_{self.sample_prefix}{sample_name}}}" + "\n"
         label_tex = label_head + table_properties + table_content + label_foot
         return label_tex
 
