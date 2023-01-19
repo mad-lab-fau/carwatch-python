@@ -122,7 +122,4 @@ class Study:
 
     @property
     def sample_indices(self):
-        if self.start_sample_from_zero:
-            return list(range(0, self.num_samples))
-        else:
-            return list(range(1, self.num_samples + 1))
+        return list(range(0, self.num_samples))
