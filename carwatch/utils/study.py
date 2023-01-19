@@ -4,7 +4,7 @@ from typing import Optional, Union, Sequence
 
 import pandas as pd
 
-from carwatch.utils.utils import sanitize_str_for_tex, assert_file_ending
+from carwatch.utils.utils import assert_file_ending
 
 
 class Study:
@@ -22,7 +22,7 @@ class Study:
             subject_column: Optional[str] = "subject",
             subject_prefix: Optional[str] = None,
             has_evening_sample: bool = False,
-            start_sample_from_zero: bool = False
+            start_sample_from_zero: bool = False,
     ):
         """Class that represents a study.
 
@@ -48,9 +48,8 @@ class Study:
         start_sample_from_zero: bool, optional
             Whether the ID of the first biomarker sample is 0, default is ``False``
             When set to ``False``, ID starts from 1
-
         """
-        self.study_name = sanitize_str_for_tex(study_name)
+        self.study_name = study_name
         self.num_days = num_days
         self.num_samples = num_samples
         self.subject_path = subject_path
@@ -67,7 +66,7 @@ class Study:
         if self.num_subjects > Study.MAX_NUM_SUBJECTS:
             raise ValueError(f"Sorry, studies with more than {Study.MAX_NUM_SUBJECTS} participants are not supported!")
         if subject_prefix:
-            subject_prefix = sanitize_str_for_tex(subject_prefix)
+            subject_prefix = subject_prefix
         self.subject_prefix = subject_prefix
         self.has_evening_sample = has_evening_sample
         self.start_sample_from_zero = start_sample_from_zero
@@ -97,7 +96,7 @@ class Study:
         try:
             if assert_file_ending(subject_path, [".csv", ".txt"]):
                 subject_data = pd.read_csv(subject_path)
-                subject_ids = subject_data[subject_column].apply(sanitize_str_for_tex)
+                subject_ids = subject_data[subject_column]
                 return subject_ids.to_list()
             return None
         # _assert_file_ending throws value error if file has wrong ending/doesn't exist

@@ -248,6 +248,7 @@ class LabelGenerator:
             with c: check digit, p: participant id, d: study day, s: biomarker sample
 
         """
+        study_name = sanitize_str_for_tex(self.study.study_name)
         day = int(barcode_id // 100) % 100
         if self.study.start_sample_from_zero:
             sample = barcode_id % 100
@@ -258,7 +259,7 @@ class LabelGenerator:
         subject_name = f"{subject:0{subject_name_padding}d}"
         if self.study.subject_path:
             # subject has a certain identifier and not just a number
-            subject_name = self.study.subject_names[subject - 1]
+            subject_name = sanitize_str_for_tex(self.study.subject_names[subject - 1])
         # label is realized with latex table
         label_head = r"\genericlabel" + "\n" + r"\begin{tabular}"
         label_foot = r"\end{tabular}" + "\n\n"
@@ -286,26 +287,26 @@ class LabelGenerator:
                 sample = "A"
         if self.add_name:
             delimiter = r"\_"
-            if len(self.study.study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
+            if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
                 # insert linebreak between study name and subject id to prevent overflow
                 delimiter = r"\newline "
             # add study name, subject id, day, and sample to second column
             if self.has_barcode:
                 # insert infos as one row in the second column
                 table_content += (
-                        rf"{font_size}{{{self.study.study_name}{delimiter}{subject_name}"
+                        rf"{font_size}{{{study_name}{delimiter}{subject_name}"
                         + rf"\newline T{day}\_{self.sample_prefix}{sample}}}"
                         + "\n"
                 )
             else:
                 # insert infos centered in two rows
-                if len(self.study.study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
+                if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
                     table_content += (
-                            rf"{font_size}{{{self.study.study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample}}}" + "\n"
+                            rf"{font_size}{{{study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample}}}" + "\n"
                     )
                 else:
                     table_content += (
-                            rf"{font_size}{{{self.study.study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample}}}" + "\n"
+                            rf"{font_size}{{{study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample}}}" + "\n"
                     )
         else:
             # add day and sample to second column
