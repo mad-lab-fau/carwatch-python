@@ -255,12 +255,9 @@ class LabelGenerator:
             sample_name = barcode_id % 100
         else:
             sample_name = (barcode_id + 1) % 100
-        subject = int(barcode_id // 1e4)
-        subject_name_padding = len(str(self.study.num_subjects))  # length of zero-padding depending on subject count
-        subject_name = f"{subject:0{subject_name_padding}d}"
-        if self.study.subject_path:
-            # subject has a certain identifier and not just a number
-            subject_name = sanitize_str_for_tex(self.study.subject_names[subject - 1])
+        subject_index = int(barcode_id // 1e4)
+        subject_name = self.study.subject_names[subject_index - 1]
+        subject_name = sanitize_str_for_tex(subject_name)
         # label is realized with latex table
         label_head = r"\genericlabel" + "\n" + r"\begin{tabular}"
         label_foot = r"\end{tabular}" + "\n\n"
@@ -271,7 +268,7 @@ class LabelGenerator:
             # add barcode to first column
             table_content += (
                     rf"\includegraphics[height={self.layout.get_label_height() - 4}mm,width="
-                    + rf"\linewidth,keepaspectratio]{{img/barcode_{subject:03d}{day:02d}{sample:02d}.pdf}} &"
+                    + rf"\linewidth,keepaspectratio]{{img/barcode_{subject_index:03d}{day:02d}{sample:02d}.pdf}} &"
             )
             font_size = r"\tiny"  # decrease font size to make it fit next to barcode
         else:

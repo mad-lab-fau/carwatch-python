@@ -79,9 +79,11 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
 )
 @click.option(
     "--has-subject-prefix",
-    required=True,
+    default=False,
     prompt="Add prefix to participant number (e.g., 'VP_')?",
     is_flag=True,
+    cls=Condition,
+    neg_condition="subject_path"
 )
 @click.option(
     "--subject-prefix",
@@ -236,7 +238,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     default="15",
     required=False,
     prompt="Please specify duration between all saliva samples in minutes"
-           " (as number when constant, as comma-separated when varying from sample to sample)",
+           " (as number when constant, as comma-separated list when varying from sample to sample)",
     type=str,
     help="The duration between saliva samples in minutes.",
     callback=validate_saliva_distances,
