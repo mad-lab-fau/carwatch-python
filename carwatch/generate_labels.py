@@ -79,7 +79,6 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
 )
 @click.option(
     "--has-subject-prefix",
-    default=False,
     prompt="Add prefix to participant number (e.g., 'VP_')?",
     is_flag=True,
     cls=Condition,
@@ -127,10 +126,10 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     pos_condition="generate_barcode",
 )
 @click.option(
-    "--custom-layout",
-    prompt="Use custom layout instead of Avery Zweckform J4791?",
+    "--default-layout",
+    prompt="Use Avery Zweckform J4791 as default layout?",
     is_flag=True,
-    help="Whether a custom layout will be specified.",
+    help="Whether the default layout will be used specified.",
     cls=Condition,
     pos_condition="generate_barcode",
 )
@@ -140,7 +139,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=int,
     help="The number of distinct labels per column",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--num_rows",
@@ -148,7 +147,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=int,
     help="The number of distinct labels per row",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--left_margin",
@@ -156,7 +155,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=float,
     help="The offset between edge of sheet and first label to the left in mm",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--right_margin",
@@ -164,7 +163,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=float,
     help="The offset between edge of sheet and first label to the right in mm",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--top_margin",
@@ -172,7 +171,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=float,
     help="The offset between edge of sheet and first label to the top in mm",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--bottom_margin",
@@ -180,7 +179,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=float,
     help="The offset between edge of sheet and first label to the bottom in mm",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--inter_col",
@@ -188,7 +187,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=float,
     help="The distance between each label along the columns in mm",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--inter_row",
@@ -196,7 +195,7 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     type=float,
     help="The distance between each label along the rows in mm",
     cls=Condition,
-    pos_condition="custom_layout",
+    neg_condition="default_layout",
 )
 @click.option(
     "--generate-qr",
@@ -274,7 +273,7 @@ def run(
         generate_qr: Optional[bool] = None,
         output_name_label: Optional[str] = None,
         output_name_qr: Optional[str] = None,
-        custom_layout: Optional[bool] = None,
+        default_layout: Optional[bool] = None,
         saliva_distances: Optional[str] = None,
         contact_email: Optional[str] = None,
         **kwargs
@@ -312,7 +311,7 @@ def run(
     )
 
     if generate_barcode:
-        _generate_barcode(study, add_name, has_barcode, sample_prefix, custom_layout, output_dir, output_name_label,
+        _generate_barcode(study, add_name, has_barcode, sample_prefix, default_layout, output_dir, output_name_label,
                           **kwargs)
     if generate_qr:
         try:
@@ -324,10 +323,10 @@ def run(
     done = True
 
 
-def _generate_barcode(study, add_name, has_barcode, sample_prefix, custom_layout, output_dir, output_name_label,
+def _generate_barcode(study, add_name, has_barcode, sample_prefix, default_layout, output_dir, output_name_label,
                       **kwargs):
     generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode, sample_prefix=sample_prefix)
-    if custom_layout:
+    if not default_layout:
         layout = CustomLayout(
             num_cols=kwargs["num_cols"],
             num_rows=kwargs["num_rows"],
