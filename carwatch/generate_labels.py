@@ -79,9 +79,11 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
 )
 @click.option(
     "--has-subject-prefix",
-    required=True,
+    default=False,
     prompt="Add prefix to participant number (e.g., 'VP_')?",
     is_flag=True,
+    cls=Condition,
+    neg_condition="subject_path"
 )
 @click.option(
     "--subject-prefix",
