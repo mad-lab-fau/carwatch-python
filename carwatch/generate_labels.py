@@ -9,36 +9,30 @@ import click
 from carwatch.labels import CustomLayout, LabelGenerator
 from carwatch.qr_codes import QrCodeGenerator
 from carwatch.utils import Study, validate_subject_path, Condition, validate_mail_input, validate_saliva_distances
+from carwatch.utils.click_helper import NumericChoice
+
+CAR_STUDY = 1
+LAB_STUDY = 2
+OTHER_STUDY = 3
+STUDY_TYPES = [CAR_STUDY, LAB_STUDY, OTHER_STUDY]
+EVENING_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
+APP_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
 
 
 @click.command()
 @click.option(
-    "--study-name", required=True, prompt="Study name", type=str, help="A descriptive abbreviation for your study name."
-)
-@click.option(
-    "--num-days", required=True, prompt="Duration of study [days]", type=int, help="The duration of your study in days."
-)
-@click.option(
-    "--sample_prefix",
+    "--study-name",
     required=True,
-    default="S",
-    prompt="Prefix for your type of biomarker (e.g., S for saliva)",
+    prompt="Study name",
     type=str,
-    help="The prefix for the biomarker type of the collected samples.",
+    help="A descriptive abbreviation for your study name."
 )
 @click.option(
-    "--num-samples",
+    "--num-days",
     required=True,
-    prompt="Number of biomarker samples [per day]",
+    prompt="Duration of study [days]",
     type=int,
-    help="The daily number of biomarker samples taken from every participant.",
-)
-@click.option(
-    "--sample_start_id",
-    required=True,
-    default=0,
-    prompt="Should biomarker IDs start at 0 or at 1 (i.e., S0 vs. S1)?",
-    type=click.IntRange(0, 1),
+    help="The duration of your study in days."
 )
 @click.option(
     "--subject-data",
@@ -95,16 +89,48 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
     pos_condition="has_subject_prefix",
 )
 @click.option(
-    "--has-evening-sample",
+    "--num-samples",
     required=True,
+    prompt="Number of biomarker samples [per day]",
+    type=int,
+    help="The daily number of biomarker samples taken from every participant.",
+)
+@click.option(
+    "--sample_prefix",
+    required=True,
+    default="S",
+    prompt="Prefix for your type of biomarker (e.g., S for saliva)",
+    type=str,
+    help="The prefix for the biomarker type of the collected samples.",
+)
+@click.option(
+    "--sample_start_id",
+    required=True,
+    default=0,
+    prompt="Should biomarker IDs start at 0 or at 1 (i.e., S0 vs. S1)?",
+    type=click.IntRange(0, 1),
+)
+@click.option(
+    "--study_type",
+    required=True,
+    default=CAR_STUDY,
+    prompt="Type of study? (1 for CAR study, 2 for Lab-based study, 3 for Other)?",
+    type=click.IntRange(1, len(STUDY_TYPES)),
+)
+@click.option(
+    "--has-evening-sample",
     prompt="Evening sample taken?",
     is_flag=True,
     help="Whether a biomarker sample is taken in the evening.",
+    cls=NumericChoice,
+    chosen_number="study_type",
+    option_map=EVENING_OPTION,
+
 )
 @click.option(
     "--generate-barcode",
     required=True,
-    prompt="Generate printable labels for study?",
+    prompt="\n\nGenerate printable labels for study?",
     is_flag=True,
     help="Whether a PDF with barcodes encoding the information for individual biomarker samples should be generated.",
 )
@@ -199,9 +225,11 @@ from carwatch.utils import Study, validate_subject_path, Condition, validate_mai
 )
 @click.option(
     "--generate-qr",
-    required=True,
-    prompt="Use CAR Watch app for study?",
+    prompt="\n\nUse CAR Watch app for study?",
     is_flag=True,
+    cls=NumericChoice,
+    chosen_number="study_type",
+    option_map=APP_OPTION,
     help="Whether a qr code encoding the study data for configuring the CAR watch app should be generated.",
 )
 @click.option(
