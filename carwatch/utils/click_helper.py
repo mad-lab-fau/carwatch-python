@@ -52,6 +52,38 @@ class Condition(click.Option):
         return super().handle_parse_result(ctx, opts, args)
 
 
+class NumericChoice(click.Option):
+    """Helper class that displays options as prompt depending on number selection previously set by user."""
+
+    def __init__(self, *args, **kwargs):
+        """Display options as prompt depending on numeric options previously set by user.
+
+        To invoke this feature for an option, specify ``cls=NumericChoice`` and ``pos_condition="conditional_option"``
+        for positive relations and ``neg_condition="conditional_option"`` for negative relations.
+        Note that ``conditional_option`` need to be either a flag or a bool.
+
+        Parameters
+        ----------
+        option: str
+            name of a previously prompted variable from a fixed int range
+        option_map: dict
+            defines whether current prompt is displayed for every possible value of the option parameter
+        """
+
+        self.option = kwargs.pop("chosen_number")
+        self.option_map = kwargs.pop("option_map")
+        super().__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx, opts, args):
+        chosen_number = ctx.params[self.option]
+        is_positive = self.option_map[chosen_number]
+        if is_positive:
+            self.required = True
+        else:
+            self.prompt = None
+        return super().handle_parse_result(ctx, opts, args)
+
+
 def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     if value:
         try:
