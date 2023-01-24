@@ -104,16 +104,24 @@ class Study:
             print(e)
             sys.exit(1)
 
+    def get_subject_name(self, subject_index: int):
+        if self.subject_path:
+            # no prefix or padding used
+            return self.subject_ids[subject_index]
+        # use padding and prefix if specified
+        subject_name_padding = len(str(self.num_subjects))  # length of zero-padding depending on subject count
+        subject_name = f"{subject_index:0{subject_name_padding}d}"
+        if self.subject_prefix:
+            subject_name = f"{self.subject_prefix}{subject_name}"
+        return subject_name
+
     @property
     def subject_indices(self):
         return list(range(1, self.num_subjects + 1))
 
     @property
     def subject_names(self):
-        if self.subject_prefix:
-            return [f"{self.subject_prefix}{name}" for name in self.subject_ids]
-        else:
-            return self.subject_ids
+        return [self.get_subject_name(index-1) for index in self.subject_indices]
 
     @property
     def day_indices(self):
