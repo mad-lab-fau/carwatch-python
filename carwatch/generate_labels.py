@@ -157,6 +157,7 @@ SEPARATOR = "--------------------------------\n"
     "--default-layout",
     prompt="Use Avery Zweckform J4791 as default layout?",
     is_flag=True,
+    default=True,
     help="Whether the default layout will be used specified.",
     cls=Condition,
     pos_condition="generate_barcode",
