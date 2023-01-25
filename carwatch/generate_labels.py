@@ -9,7 +9,7 @@ import click
 from carwatch.labels import CustomLayout, LabelGenerator
 from carwatch.qr_codes import QrCodeGenerator
 from carwatch.utils import Study, validate_subject_path, Condition, validate_mail_input, validate_saliva_distances
-from carwatch.utils.click_helper import NumericChoice
+from carwatch.utils.click_helper import NumericChoice, get_file_name
 
 CAR_STUDY = 1
 LAB_STUDY = 2
@@ -18,7 +18,9 @@ STUDY_TYPES = [CAR_STUDY, LAB_STUDY, OTHER_STUDY]
 EVENING_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
 APP_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
 
-SEPARATOR = "--------------------------------\n"
+SEPARATOR = f"{'-' * 30}\n"
+DEFAULT_BARCODE_FILE_SUFFIX = "_barcodes"
+DEFAULT_QR_FILE_SUFFIX = "_qr_code"
 
 
 @click.command()
@@ -228,7 +230,7 @@ SEPARATOR = "--------------------------------\n"
 )
 @click.option(
     "--output_name_label",
-    default="barcodes",
+    default=lambda: get_file_name(DEFAULT_BARCODE_FILE_SUFFIX),
     prompt="Name of label file",
     help="Name of the generated label file.",
     envvar="PATHS",
@@ -255,7 +257,7 @@ SEPARATOR = "--------------------------------\n"
 )
 @click.option(
     "--output_name_qr",
-    default="qr_code",
+    default=lambda: get_file_name(DEFAULT_QR_FILE_SUFFIX),
     prompt="Name of QR code file",
     help="Name of the generated QR code file.",
     envvar="PATHS",

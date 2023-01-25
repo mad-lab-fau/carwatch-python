@@ -113,3 +113,9 @@ def validate_saliva_distances(ctx, param, value):  # pylint:disable=unused-argum
             if not value.isdigit():
                 raise click.BadParameter(f"Saliva distance needs to be an integer!")
     return value
+
+
+def get_file_name(suffix: str):
+    c = click.get_current_context()
+    study_name = c.params["study_name"]
+    return f"{study_name}{suffix}"
