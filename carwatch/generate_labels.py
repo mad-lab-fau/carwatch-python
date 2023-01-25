@@ -18,6 +18,8 @@ STUDY_TYPES = [CAR_STUDY, LAB_STUDY, OTHER_STUDY]
 EVENING_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
 APP_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
 
+SEPARATOR = "--------------------------------\n"
+
 
 @click.command()
 @click.option(
@@ -130,7 +132,7 @@ APP_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
 @click.option(
     "--generate-barcode",
     required=True,
-    prompt="\n\nGenerate printable labels for study?",
+    prompt=f"{SEPARATOR}Generate printable labels for study?",
     is_flag=True,
     help="Whether a PDF with barcodes encoding the information for individual biomarker samples should be generated.",
 )
@@ -224,8 +226,18 @@ APP_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
     neg_condition="default_layout",
 )
 @click.option(
+    "--output_name_label",
+    default="barcodes",
+    prompt="Name of label file",
+    help="Name of the generated label file.",
+    envvar="PATHS",
+    type=click.Path(file_okay=True, dir_okay=False),
+    cls=Condition,
+    pos_condition="generate_barcode",
+)
+@click.option(
     "--generate-qr",
-    prompt="\n\nUse CAR Watch app for study?",
+    prompt=f"{SEPARATOR}Use CAR Watch app for study?",
     is_flag=True,
     cls=NumericChoice,
     chosen_number="study_type",
@@ -239,16 +251,6 @@ APP_OPTION = {CAR_STUDY: True, LAB_STUDY: False, OTHER_STUDY: True}
     help="Directory where generated files will be stored.",
     envvar="PATHS",
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
-)
-@click.option(
-    "--output_name_label",
-    default="barcodes",
-    prompt="Name of label file",
-    help="Name of the generated label file.",
-    envvar="PATHS",
-    type=click.Path(file_okay=True, dir_okay=False),
-    cls=Condition,
-    pos_condition="generate_barcode",
 )
 @click.option(
     "--output_name_qr",
