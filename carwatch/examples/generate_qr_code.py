@@ -10,5 +10,5 @@ if __name__ == "__main__":
         num_samples=5,
         has_evening_sample=True,
     )
-    generator = QrCodeGenerator(study=study, saliva_distances=[10, 10, 10, 10], contact_email="dum@my.com")
+    generator = QrCodeGenerator(study=study, saliva_distances=[10, 10, 10], contact_email="dum@my.com")
     generator.generate(output_dir=".")
