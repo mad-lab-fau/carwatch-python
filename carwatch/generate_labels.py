@@ -289,11 +289,11 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
 )
 @click.option(
     "--check-duplicates",
-    prompt=f"{SEPARATOR}Check for duplicate barcodes in app?",
+    prompt=f"Check for duplicate barcodes in app?",
     default=False,
     is_flag=True,
     cls=Condition,
-    chosen_number="generate_qr",
+    pos_condition="generate_qr",
     help="Whether the CAR Watch app will check for every barcode, if it was scanned before.",
 )
 def run(
