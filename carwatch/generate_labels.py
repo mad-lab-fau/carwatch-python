@@ -287,6 +287,15 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     cls=Condition,
     pos_condition="generate_qr",
 )
+@click.option(
+    "--check-duplicates",
+    prompt=f"{SEPARATOR}Check for duplicate barcodes in app?",
+    default=False,
+    is_flag=True,
+    cls=Condition,
+    chosen_number="generate_qr",
+    help="Whether the CAR Watch app will check for every barcode, if it was scanned before.",
+)
 def run(
         sample_prefix: Optional[str] = None,
         study_name: Optional[str] = None,
@@ -309,6 +318,7 @@ def run(
         default_layout: Optional[bool] = None,
         saliva_distances: Optional[str] = None,
         contact_email: Optional[str] = None,
+        check_duplicates: Optional[bool] = None,
         **kwargs
 ):
     done = False
@@ -348,7 +358,7 @@ def run(
                           **kwargs)
     if generate_qr:
         try:
-            _generate_qr_code(study, saliva_distances, contact_email, output_dir, output_name_qr)
+            _generate_qr_code(study, saliva_distances, contact_email, check_duplicates, output_dir, output_name_qr)
         except ValueError as e:
             done = True
             raise click.BadParameter(str(e))
@@ -375,9 +385,9 @@ def _generate_barcode(study, add_name, has_barcode, sample_prefix, default_layou
         generator.generate(output_dir=output_dir, output_name=output_name_label)
 
 
-def _generate_qr_code(study, saliva_distances, contact_email, output_dir, output_name_qr):
+def _generate_qr_code(study, saliva_distances, contact_email, check_duplicates, output_dir, output_name_qr):
     saliva_distances = _parse_saliva_distances(saliva_distances)
-    generator = QrCodeGenerator(study=study, saliva_distances=saliva_distances, contact_email=contact_email)
+    generator = QrCodeGenerator(study=study, saliva_distances=saliva_distances, contact_email=contact_email, check_duplicates=check_duplicates)
     generator.generate(output_dir=output_dir, output_name=output_name_qr)
 
 

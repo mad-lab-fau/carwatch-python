@@ -13,7 +13,8 @@ class QrCodeGenerator:
     participants to allow them configuring `_CAR Watch_` app on their personal devices.
     """
 
-    def __init__(self, study: Study, saliva_distances: Union[int, Sequence[int]], contact_email: str):
+    def __init__(self, study: Study, saliva_distances: Union[int, Sequence[int]], contact_email: str,
+                 check_duplicates: bool = False):
         """Generate QR-Code encoding all relevant study information encoded
 
         Parameters
@@ -26,11 +27,14 @@ class QrCodeGenerator:
             If the distances are constant between all morning samples,
         contact_email: str
             E-mail address that App log data will be shared with
+        check_duplicates: bool
+            If set to ``True``, the CAR Watch app will check and alert if a barcode has been checked twice
 
         """
         self.study = study
         self.saliva_distances = self._sanitize_distances(saliva_distances)
         self.contact = contact_email
+        self.check_duplicates = check_duplicates
         self.output_dir = None
         self.output_name = f"qr_code_{self.study.study_name}"
 
@@ -66,7 +70,7 @@ class QrCodeGenerator:
     def _generate_qr_code(self):
         """Translate study data into  a QR-Code in the following format:
 
-        ``CARWATCH;N:<study_name>;D:<num_days>;S:<subject_list>;T:<saliva_distances>;E:<has_evening_sample>;M:<contact_email>``
+        ``CARWATCH;N:<study_name>;D:<num_days>;S:<subject_list>;T:<saliva_distances>;E:<has_evening_sample>;M:<contact_email>;F:<check_duplicates>``
 
         """
 
@@ -89,7 +93,8 @@ class QrCodeGenerator:
                f"S:{name_string};" \
                f"T:{distance_string};" \
                f"E:{int(self.study.has_evening_sample)};" \
-               f"M:{self.contact}"
+               f"M:{self.contact};" \
+               f"F:{int(self.check_duplicates)}"
 
         # create qr code
         img = qrcode.make(data)
