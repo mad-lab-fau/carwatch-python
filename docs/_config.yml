@@ -1,0 +1,10 @@
+lsi: false
+safe: true
+source: https://github.com/mad-lab-fau/carwatch
+incremental: false
+highlighter: rouge
+gist:
+  noscript: false
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge
