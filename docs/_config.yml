@@ -1,0 +1,33 @@
+# Welcome to Jekyll!
+
+title: A Step-by-step Guide to CARWatch
+description: >- # this means to ignore newlines until "baseurl:"
+  CARWatch is a framework to support objective and low-cost assessment of biomarker samples. 
+  It consists of an Android app that schedules sampling times and tracks them automatically by scanning a barcode on the respective tube. 
+  Furthermore, it provides tools to generate those unique barcodes for sampling tubes and configures the smartphone app, all based on your individual study setup.
+baseurl: "" # the subpath 
+url: "" # the base hostname & protocol 
+
+# Build settings
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
+show_downloads: [true]
+
+# Exclude from processing.
+# The following items will not be processed, by default.
+# Any item listed under the `exclude:` key here will be automatically added to
+# the internal "default list".
+#
+# exclude:
+#   - .sass-cache/
+#   - .jekyll-cache/
+#   - gemfiles/
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules/
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
+#
