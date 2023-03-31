@@ -2,7 +2,7 @@
 layout: default
 ---
 
-[Template](example.md)
+[Template]({{site.baseurl}}{{post.url}}example.md)
 
 This tutorial will guide you through the main consecutive steps when using CARWatch for your research:
 
