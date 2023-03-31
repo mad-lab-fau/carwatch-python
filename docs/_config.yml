@@ -5,7 +5,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   CARWatch is a framework to support objective and low-cost assessment of biomarker samples. 
   It consists of an Android app that schedules sampling times and tracks them automatically by scanning a barcode on the respective tube. 
   Furthermore, it provides tools to generate those unique barcodes for sampling tubes and configures the smartphone app, all based on your individual study setup.
-baseurl: "" # the subpath 
+baseurl: "/carwatch" # the subpath 
 url: "" # the base hostname & protocol 
 
 # Build settings
