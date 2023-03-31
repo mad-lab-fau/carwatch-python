@@ -2,7 +2,7 @@
 layout: default
 ---
 
-[Template]({{site.baseurl}}{{post.url}}example.md)
+[Template](example)
 
 This tutorial will guide you through the main consecutive steps when using CARWatch for your research:
 
@@ -18,7 +18,7 @@ Before starting, make sure you have the package installed on your machine correc
 
 A sample screenshot:
 
-<img src="{{site.url}}/images/barcode_cli.png" style="display: block; margin: auto;" />
+<img src="{{site.baseurl}}/images/barcode_cli.png" style="display: block; margin: auto;" />
 
 * * *
 # Create Configuration QR Code for Smartphone App
