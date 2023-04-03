@@ -1,9 +1,9 @@
 # CARWatch
 
-ARWatch is a framework to support objective and low-cost assessment of biomarker samples.
+CARWatch is a framework to **support objective and low-cost assessment of biomarker samples**.
 It consists of an [Android app](https://github.com/mad-lab-fau/carwatch-app) that schedules sampling times and tracks
 them automatically by scanning a barcode on the respective tube.
-Furthermore, within this package, it provides tools to prepare studies, and process the data recorded in the app.
+Furthermore, within this package, it provides **tools to prepare studies**, and **process the data recorded in the app**.
 Preparation steps include generating unique barcodes for sampling tubes and a QR-Code for configuring the smartphone
 app, all based on your individual study setup.
 
@@ -30,7 +30,7 @@ poetry install
 
 ## Usage
 
-CarWatch can be used both programmatically and with the provided command line interface (CLI).
+CarWatch can be used both **programmatically** and with the provided **command line interface (CLI)**.
 
 The core functionalities of the CARWatch package are
 
