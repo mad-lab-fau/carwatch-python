@@ -1,5 +1,12 @@
 # CARWatch
 
+[![PyPI](https://img.shields.io/pypi/v/carwatch)](https://pypi.org/project/carwatch/)
+![GitHub](https://img.shields.io/github/license/mad-lab-fau/carwatch)
+[![Test and Lint](https://github.com/mad-lab-fau/carwatch/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/mad-lab-fau/carwatch/actions/workflows/test-and-lint.yml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/carwatch)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mad-lab-fau/carwatch)
+
 CARWatch is a framework to support **objective** and **low-cost** assessment of cortisol samples, especially, but not 
 limited to, the **cortisol awakening response (CAR)** in real-world, unsupervised environments.
 It consists of an [Android app](https://github.com/mad-lab-fau/carwatch-app) that schedules sampling times and tracks
