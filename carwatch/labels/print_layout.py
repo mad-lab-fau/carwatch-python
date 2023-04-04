@@ -11,6 +11,14 @@ class PrintLayout:
     a4_width = 210
 
     def get_label_height(self):
+        """Return height of each label in mm.
+
+        Returns
+        -------
+        float
+            Height of each label in mm.
+
+        """
         height_all_labels = self.a4_height - self.top_margin - self.bottom_margin - self.inter_row * (self.num_rows - 1)
         return height_all_labels / self.num_rows
 
@@ -47,7 +55,15 @@ class PrintLayout:
         """Return offset between edge of sheet and first label to the right in mm."""
 
     @right_margin.setter
-    def right_margin(self, value):
+    def right_margin(self, value: float):
+        """Set offset between edge of sheet and first label to the right in mm.
+
+        Parameters
+        ----------
+        value : float
+            Offset between edge of sheet and first label to the right in mm.
+
+        """
         self.right_margin = value
 
     @property
@@ -56,7 +72,15 @@ class PrintLayout:
         """Return offset between edge of sheet and first label to the top in mm."""
 
     @top_margin.setter
-    def top_margin(self, value):
+    def top_margin(self, value: float):
+        """Set offset between edge of sheet and first label to the top in mm.
+
+        Parameters
+        ----------
+        value : float
+            Offset between edge of sheet and first label to the top in mm.
+
+        """
         self.top_margin = value
 
     @property
@@ -65,7 +89,15 @@ class PrintLayout:
         """Return offset between edge of sheet and first label to the bottom in mm."""
 
     @bottom_margin.setter
-    def bottom_margin(self, value):
+    def bottom_margin(self, value: float):
+        """Set offset between edge of sheet and first label to the bottom in mm.
+
+        Parameters
+        ----------
+        value : float
+            Offset between edge of sheet and first label to the bottom in mm.
+
+        """
         self.bottom_margin = value
 
     @property
@@ -74,7 +106,15 @@ class PrintLayout:
         """Return distance between each label along the columns in mm."""
 
     @inter_col.setter
-    def inter_col(self, value):
+    def inter_col(self, value: float):
+        """Set distance between each label along the columns in mm.
+
+        Parameters
+        ----------
+        value : float
+            Distance between each label along the columns in mm.
+
+        """
         self.inter_col = value
 
     @property
@@ -83,7 +123,15 @@ class PrintLayout:
         """Return distance between each label along the rows in mm."""
 
     @inter_row.setter
-    def inter_row(self, value):
+    def inter_row(self, value: float):
+        """Set distance between each label along the rows in mm.
+
+        Parameters
+        ----------
+        value : float
+            Distance between each label along the rows in mm.
+
+        """
         self.inter_row = value
 
 
@@ -123,6 +171,28 @@ class CustomLayout(PrintLayout):
         inter_col: float,
         inter_row: float,
     ):
+        """Initialize a custom layout.
+
+        Parameters
+        ----------
+        num_cols : int
+            Number of distinct labels per column.
+        num_rows : int
+            Number of distinct labels per row.
+        left_margin : float
+            Offset between edge of sheet and first label to the left in mm.
+        right_margin : float
+            Offset between edge of sheet and last label to the right in mm.
+        top_margin : float
+            Offset between edge of sheet and first label to the top in mm.
+        bottom_margin : float
+            Offset between edge of sheet and last label to the bottom in mm.
+        inter_col : float
+            Distance between each label along the columns in mm.
+        inter_row : float
+            Distance between each label along the rows in mm.
+
+        """
         self.num_cols = num_cols
         self.num_rows = num_rows
         self.left_margin = left_margin

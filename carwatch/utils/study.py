@@ -1,6 +1,7 @@
+"""Module that contains the :class:`~carwatch.utils.study.Study` class."""
 import sys
 from pathlib import Path
-from typing import Optional, Union, Sequence
+from typing import Optional, Sequence, Union
 
 import pandas as pd
 
@@ -13,16 +14,16 @@ class Study:
     MAX_NUM_SUBJECTS = 999  # maximal amount of subjects representable with EAN8
 
     def __init__(
-            self,
-            study_name: str,
-            num_days: int,
-            num_samples: int,
-            num_subjects: Optional[int] = None,
-            subject_path: Optional[Union[str, Path]] = None,
-            subject_column: Optional[str] = "subject",
-            subject_prefix: Optional[str] = None,
-            has_evening_sample: bool = False,
-            start_sample_from_zero: bool = False,
+        self,
+        study_name: str,
+        num_days: int,
+        num_samples: int,
+        num_subjects: Optional[int] = None,
+        subject_path: Optional[Union[str, Path]] = None,
+        subject_column: Optional[str] = "subject",
+        subject_prefix: Optional[str] = None,
+        has_evening_sample: bool = False,
+        start_sample_from_zero: bool = False,
     ):
         """Class that represents a study.
 
@@ -39,7 +40,7 @@ class Study:
         subject_path: str or :class:`~pathlib.Path`, optional
             Path to a tabular list of all subjects
         subject_column: str, optional
-            Only used when ``subject_path`` is set, specifies the column name containing the subejct ids,
+            Only used when ``subject_path`` is set, specifies the column name containing the subject ids,
             default value is ``"subject"``.
         subject_prefix: str, optional
             Add prefix to participant number (e.g., "VP_")
@@ -48,6 +49,7 @@ class Study:
         start_sample_from_zero: bool, optional
             Whether the ID of the first biomarker sample is 0, default is ``False``
             When set to ``False``, ID starts from 1
+
         """
         self.study_name = study_name
         self.num_days = num_days
@@ -65,8 +67,8 @@ class Study:
             )
         if self.num_subjects > Study.MAX_NUM_SUBJECTS:
             raise ValueError(f"Sorry, studies with more than {Study.MAX_NUM_SUBJECTS} participants are not supported!")
-        if subject_prefix:
-            subject_prefix = subject_prefix
+        # if subject_prefix:
+        #     subject_prefix = subject_prefix
         self.subject_prefix = subject_prefix
         self.has_evening_sample = has_evening_sample
         self.start_sample_from_zero = start_sample_from_zero
@@ -104,7 +106,20 @@ class Study:
             print(e)
             sys.exit(1)
 
-    def get_subject_name(self, subject_index: int):
+    def get_subject_name(self, subject_index: int) -> str:
+        """Return the name of a subject.
+
+        Parameters
+        ----------
+        subject_index : int
+            index of the subject
+
+        Returns
+        -------
+        str
+            name of the subject
+
+        """
         if self.subject_path:
             # no prefix or padding used
             return self.subject_ids[subject_index]
@@ -117,16 +132,48 @@ class Study:
 
     @property
     def subject_indices(self):
+        """Return a list of subject indices.
+
+        Returns
+        -------
+        list
+            list of subject indices
+
+        """
         return list(range(1, self.num_subjects + 1))
 
     @property
     def subject_names(self):
-        return [self.get_subject_name(index-1) for index in self.subject_indices]
+        """Return a list of subject names.
+
+        Returns
+        -------
+        list
+            list of subject names
+
+        """
+        return [self.get_subject_name(index - 1) for index in self.subject_indices]
 
     @property
     def day_indices(self):
+        """Return a list of day indices.
+
+        Returns
+        -------
+        list
+            list of day indices
+
+        """
         return list(range(1, self.num_days + 1))
 
     @property
     def sample_indices(self):
+        """Return a list of sample indices.
+
+        Returns
+        -------
+        list
+            list of sample indices
+
+        """
         return list(range(0, self.num_samples))

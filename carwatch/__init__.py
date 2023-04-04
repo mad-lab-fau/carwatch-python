@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""CARWatch: A Python package for improving the accuracy of cortisol awakening response sampling."""
 
 __version__ = "0.1.0"
 

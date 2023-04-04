@@ -1,9 +1,10 @@
+"""Utility functions for the carwatch package."""
 import os
 import subprocess
+import warnings
 from pathlib import Path
 from subprocess import check_call
-from typing import Optional, Union, Sequence
-import warnings
+from typing import Optional, Sequence, Union
 
 
 def assert_is_dir(path: Path) -> Optional[bool]:

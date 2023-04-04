@@ -1,3 +1,5 @@
+"""Example of how to generate labels for a study."""
+
 from carwatch.labels import CustomLayout, LabelGenerator
 from carwatch.utils import Study
 

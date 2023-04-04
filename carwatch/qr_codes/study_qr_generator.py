@@ -1,6 +1,8 @@
+"""Module for generating QR codes to configure a study for the CARWatch app."""
 import sys
 from pathlib import Path
 from typing import Sequence, Union
+
 import qrcode
 
 from carwatch.utils.study import Study
@@ -8,14 +10,21 @@ from carwatch.utils.utils import assert_is_dir, sanitize_str_for_qr
 
 
 class QrCodeGenerator:
-    """Class that is used to generate a `.png` of a QR-Code including all relevant study properties required for usage
-    in combination with the `_CAR Watch_` app. The QR-Code is unique for each study. It can be distributed to study
-    participants to allow them configuring `_CAR Watch_` app on their personal devices.
+    """Class that is used to generate a QR-Code including all relevant study information for the CARWatch app.
+
+    The QR-Code can be scanned by the CARWatch app to configure the app for a specific study.
+
     """
 
-    def __init__(self, study: Study, saliva_distances: Union[int, Sequence[int]], contact_email: str,
-                 check_duplicates: bool = False, enable_manual_scan: bool = False):
-        """Generate QR-Code encoding all relevant study information encoded
+    def __init__(
+        self,
+        study: Study,
+        saliva_distances: Union[int, Sequence[int]],
+        contact_email: str,
+        check_duplicates: bool = False,
+        enable_manual_scan: bool = False,
+    ):
+        """Generate QR-Code encoding all relevant study information.
 
         Parameters
         ----------
@@ -41,10 +50,7 @@ class QrCodeGenerator:
         self.output_dir = None
         self.output_name = f"qr_code_{self.study.study_name}"
 
-    def generate(self,
-                 output_dir: str = ".",
-                 output_name: Union[str, None] = None
-                 ):
+    def generate(self, output_dir: str = ".", output_name: Union[str, None] = None):
         """Generate a `*.png` file with QR code according to the properties of the created ``QrCodeGenerator``.
 
         Parameters
@@ -70,13 +76,20 @@ class QrCodeGenerator:
         qr_img = self._generate_qr_code()
         self._save_qr_img(qr_img)
 
-    def _generate_qr_code(self):
-        """Translate study data into  a QR-Code in the following format:
+    def _generate_qr_code(self) -> qrcode.image.pil.PilImage:
+        """Generate a QR-Code with the study information.
 
-        ``CARWATCH;N:<study_name>;D:<num_days>;S:<subject_list>;T:<saliva_distances>;E:<has_evening_sample>;M:<contact_email>;F:<check_duplicates>;``
+        This method translates the study data into a QR-Code. The information is encoded in the following format:
+
+        ``CARWATCH;N:<study_name>;D:<num_days>;S:<subject_list>;T:<saliva_distances>;
+        E:<has_evening_sample>;M:<contact_email>;F:<check_duplicates>;``
+
+        Returns
+        -------
+        :obj:`qrcode.image.pil.PilImage`
+            QR-Code as PIL image
 
         """
-
         # sanitize inputs to prevent decoding issues
         forbidden = [";", ":", ","]
         study_name = sanitize_str_for_qr(self.study.study_name, forbidden)
@@ -90,15 +103,17 @@ class QrCodeGenerator:
         distance_string = ",".join(str(dist) for dist in self.saliva_distances)
 
         # create encoding
-        data = f"{app_id};" \
-               f"N:{study_name};" \
-               f"D:{self.study.num_days};" \
-               f"S:{name_string};" \
-               f"T:{distance_string};" \
-               f"E:{int(self.study.has_evening_sample)};" \
-               f"M:{self.contact};" \
-               f"FD:{int(self.check_duplicates)};" \
-               f"FM:{int(self.enable_manual_scan)}"
+        data = (
+            f"{app_id};"
+            f"N:{study_name};"
+            f"D:{self.study.num_days};"
+            f"S:{name_string};"
+            f"T:{distance_string};"
+            f"E:{int(self.study.has_evening_sample)};"
+            f"M:{self.contact};"
+            f"FD:{int(self.check_duplicates)};"
+            f"FM:{int(self.enable_manual_scan)}"
+        )
 
         # create qr code
         img = qrcode.make(data)
@@ -125,6 +140,7 @@ class QrCodeGenerator:
                 raise ValueError(
                     f"Incorrect number of saliva distances provided! "
                     f"Needs to be {num_morning_samples - 1}, as "
-                    f"{num_morning_samples} morning samples will be taken.")
+                    f"{num_morning_samples} morning samples will be taken."
+                )
             raise ValueError("Invalid data detected in saliva distances! All values need to be integers!")
         raise ValueError("Saliva distances data type is invalid! Needs to be int or list of ints.")

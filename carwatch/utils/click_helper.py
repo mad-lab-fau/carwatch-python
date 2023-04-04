@@ -1,7 +1,8 @@
+"""Helper functions for click."""
+import re
 from pathlib import Path
 
 import click
-import re
 
 from carwatch.utils import assert_file_ending
 
@@ -68,8 +69,8 @@ class NumericChoice(click.Option):
             name of a previously prompted variable from a fixed int range
         option_map: dict
             defines whether current prompt is displayed for every possible value of the option parameter
-        """
 
+        """
         self.option = kwargs.pop("chosen_number")
         self.option_map = kwargs.pop("option_map")
         super().__init__(*args, **kwargs)
@@ -84,7 +85,7 @@ class NumericChoice(click.Option):
         return super().handle_parse_result(ctx, opts, args)
 
 
-def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
+def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument # noqa: C901
     if value:
         try:
             assert_file_ending(Path(value), [".csv", ".txt"])
@@ -93,7 +94,7 @@ def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     return value
 
 
-def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument
+def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument # noqa: C901
     if value:
         email_regex = r"[^@]+@[^@]+\.[^@]+"  # pattern <...>@<...>.<...>
         if not re.fullmatch(email_regex, value):
@@ -101,21 +102,29 @@ def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument
     return value
 
 
-def validate_saliva_distances(ctx, param, value):  # pylint:disable=unused-argument
+def validate_saliva_distances(ctx, param, value):  # pylint:disable=unused-argument # noqa: C901
     if value:
         value = value.replace(" ", "")  # trim spaces
         if "," in value:
             distances = value.split(",")
             for dist in distances:
                 if not dist.isdigit():
-                    raise click.BadParameter(f"Saliva distances need to be comma-separated integers!")
+                    raise click.BadParameter("Saliva distances need to be comma-separated integers!")
         else:
             if not value.isdigit():
-                raise click.BadParameter(f"Saliva distance needs to be an integer!")
+                raise click.BadParameter("Saliva distance needs to be an integer!")
     return value
 
 
-def get_file_name(suffix: str):
+def get_file_name(suffix: str) -> str:
+    """Get file name from click context.
+
+    Parameters
+    ----------
+    suffix: str
+        suffix to append to file name
+
+    """
     c = click.get_current_context()
     study_name = c.params["study_name"]
     return f"{study_name}{suffix}"

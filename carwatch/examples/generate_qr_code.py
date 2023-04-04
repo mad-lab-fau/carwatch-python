@@ -1,4 +1,5 @@
-from carwatch.labels import CustomLayout, LabelGenerator
+"""Example of how to generate QR codes for a study."""
+
 from carwatch.qr_codes import QrCodeGenerator
 from carwatch.utils import Study
 

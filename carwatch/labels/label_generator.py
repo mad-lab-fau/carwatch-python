@@ -1,3 +1,4 @@
+"""Module for generating printable saliva label files."""
 import importlib.resources as pkg_resources
 import sys
 from itertools import product
@@ -9,16 +10,16 @@ import cairosvg
 import numpy as np
 
 from carwatch.labels.print_layout import AveryZweckformJ4791Layout, PrintLayout
-from carwatch.utils.utils import tex_to_pdf, write_to_file, assert_is_dir, sanitize_str_for_tex
 from carwatch.utils.study import Study
+from carwatch.utils.utils import assert_is_dir, sanitize_str_for_tex, tex_to_pdf, write_to_file
 
 
 class LabelGenerator:
-    """Class that is used to generate printable `*.pdf` files with labels for all saliva samples
-     (or other biomarker swabs) taken within a study.
+    """Class that is used to generate printable `*.pdf` files with labels for all saliva samples within a study.
 
-    Tested for labels of type `_Avery Zweckform J4791_` (48 labels per A4-sheet) and only intended to be used for print
+    Tested for labels of type `_Avery Zweckform J4791_` (48 labels per A4-sheet) and only intended to be used to print
     labels in A4 format. Note that for smaller labels, text overflows might occur.
+
     """
 
     EAN8 = barcode.get_barcode_class("ean8")
@@ -86,11 +87,11 @@ class LabelGenerator:
         self.barcode_ids = None
 
     def generate(
-            self,
-            output_dir: str = ".",
-            output_name: Union[str, None] = None,
-            layout: PrintLayout = AveryZweckformJ4791Layout(),
-            debug=False,
+        self,
+        output_dir: str = ".",
+        output_name: Union[str, None] = None,
+        layout: PrintLayout = AveryZweckformJ4791Layout(),
+        debug=False,
     ):
         """Generate a `*.pdf` file with labels according to the properties of the created ``LabelGenerator``.
 
@@ -267,8 +268,8 @@ class LabelGenerator:
             table_properties = r"{m{0.45\linewidth} m{0.4\linewidth}}" + "\n"
             # add barcode to first column
             table_content += (
-                    rf"\includegraphics[height={self.layout.get_label_height() - 4}mm,width="
-                    + rf"\linewidth,keepaspectratio]{{img/barcode_{subject_index:03d}{day:02d}{sample:02d}.pdf}} &"
+                rf"\includegraphics[height={self.layout.get_label_height() - 4}mm,width="
+                + rf"\linewidth,keepaspectratio]{{img/barcode_{subject_index:03d}{day:02d}{sample:02d}.pdf}} &"
             )
             font_size = r"\tiny"  # decrease font size to make it fit next to barcode
         else:
@@ -291,19 +292,21 @@ class LabelGenerator:
             if self.has_barcode:
                 # insert infos as one row in the second column
                 table_content += (
-                        rf"{font_size}{{{study_name}{delimiter}{subject_name}"
-                        + rf"\newline T{day}\_{self.sample_prefix}{sample_name}}}"
-                        + "\n"
+                    rf"{font_size}{{{study_name}{delimiter}{subject_name}"
+                    + rf"\newline T{day}\_{self.sample_prefix}{sample_name}}}"
+                    + "\n"
                 )
             else:
                 # insert infos centered in two rows
                 if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
                     table_content += (
-                            rf"{font_size}{{{study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample_name}}}" + "\n"
+                        rf"{font_size}{{{study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample_name}}}"
+                        + "\n"
                     )
                 else:
                     table_content += (
-                            rf"{font_size}{{{study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample_name}}}" + "\n"
+                        rf"{font_size}{{{study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample_name}}}"
+                        + "\n"
                     )
         else:
             # add day and sample to second column
