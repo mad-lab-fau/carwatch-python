@@ -1,9 +1,16 @@
 [tool.poetry]
 name = "carwatch"
 version = "0.1.0"
-description = ""
-authors = ["Annika Muecke <annika.muecke@fau.de>"]
+description = "A Python package for the CARWatch framework to improve cortisol awakening response sampling."
+authors = [
+    "Annika Muecke <annika.muecke@fau.de>",
+    "Robert Richer <robert.richer@fau.de>",
+    "Arne Küderle <arne.kuederle@fau.de>",
+    "Luca Abel <luca.abel@fau.de>"
+]
 license = "MIT"
+homepage = "https://github.com/mad-lab-fau/carwatch"
+repository = "https://github.com/mad-lab-fau/carwatch"
 readme = "README.md"
 
 [tool.poetry.dependencies]
