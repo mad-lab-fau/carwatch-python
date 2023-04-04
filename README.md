@@ -191,7 +191,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Contributing
 
-We welcome contributions to `carwatch`! Have a look at the [Contributing Guidelines](CONTRIBUTING.md)
+We welcome contributions to `carwatch`! For more information, have a look at the [Contributing Guidelines](CONTRIBUTING.md).
 
 ## Citing carwatch
 
