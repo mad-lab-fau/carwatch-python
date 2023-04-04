@@ -7,7 +7,7 @@
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/carwatch)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mad-lab-fau/carwatch)
 
-**Get the Android app:**
+**Get the Android app on the Play Store:**  
 [![Google Play](https://img.shields.io/badge/Google%20Play-CARWatch-3DDC84?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=de.fau.cs.mad.carwatch)
 
 CARWatch is a framework to support **objective** and **low-cost** assessment of cortisol samples, especially, but not 
