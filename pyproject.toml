@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "carwatch"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python package for the CARWatch framework to improve cortisol awakening response sampling."
 authors = [
     "Annika Muecke <annika.muecke@fau.de>",
@@ -70,4 +70,4 @@ _check_black = "black . --check"
 _check_isort = "isort . --check"
 check = { sequence = ["_check_black", "_check_isort", "lint"], help = "Check all potential format and linting issues." }
 test = { cmd = "pytest --cov=carwatch --cov-report=term-missing --cov-report=xml", help = "Run Pytest with coverage." }
-version = { script = "_tasks:task_update_version()" }
+update_version = { script = "_tasks:task_update_version()" }
