@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-from carwatch.utils import assert_file_ending
+from carwatch.utils.utils import assert_file_ending
 
 
 class Condition(click.Option):

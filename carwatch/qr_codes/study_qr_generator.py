@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Sequence, Union
 
 import qrcode
+from qrcode.image.pil import PilImage
 
 from carwatch.utils.study import Study
 from carwatch.utils.utils import assert_is_dir, sanitize_str_for_qr
