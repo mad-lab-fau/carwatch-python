@@ -11,28 +11,29 @@
 [![Google Play](https://img.shields.io/badge/Google%20Play-CARWatch-3DDC84?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=de.fau.cs.mad.carwatch)
 
 CARWatch is a framework to support **objective** and **low-cost** assessment of cortisol samples, especially, but not 
-limited to, the **cortisol awakening response (CAR)** in real-world, unsupervised environments.
-It consists of an [Android app](https://github.com/mad-lab-fau/carwatch-app) that schedules sampling times and tracks
-them by scanning a barcode on the respective sampling tube as well as of a Python package that provides tools to
-**set up and prepare** studies and to **process** the log data recorded by the app.
+limited to, during the **cortisol awakening response (CAR)** in real-world, unsupervised environments.
+It consists of an [Android application](https://github.com/mad-lab-fau/carwatch-app) that schedules sampling times and tracks
+them by scanning a barcode on the respective sampling tube as well as a Python package that provides tools to 
+**configure studies** and **prepare the study materials** and to **process the log data** recorded by the app.
 
-Preparation steps include generating unique barcodes for saliva sampling tubes and a QR-Code for configuring the 
-smartphone app, all based on your individual study setup.
 
 ## Features
-`carwatch` provides a user-friendly command-line interface for the following tasks: 
-1. Setting up a CAR study.   
+In order to use CARWatch, you need to prepare the study materials and configure the app. 
+
+All these features are provided by `carwatch` which offers a  user-friendly command-line interface 
+for the following tasks: 
+1. **Setting up a CAR study.**   
 This includes: 
    * Customizing study properties to your needs
    * Setting up your desired sampling schedule
    * Generating a QR-Code for the [CARWatch app](https://github.com/mad-lab-fau/carwatch-app) to automatically set up 
    the study in the app
-2. Creating printable labels with barcodes for objective sampling time assessment.  
+2. **Creating printable labels with barcodes for objective sampling time assessment.**  
 This includes:
    * Customizing the numer of saliva samples per day, the number of days, and the number of study participants
    * Adding an optional evening saliva sample
    * Customize barcodes to fit your printable label templates
-3. Analyzing the CARWatch log data.
+3. **Analyzing the CARWatch log data.**  
 This includes:
    * Extracting the sampling timestamps from the log data
    * Extracting the self-reported awakening times (if available)
@@ -43,7 +44,7 @@ This includes:
 `carwatch` requires Python >=3.8. First, install a compatible version of Python 
 (e.g. using [miniconda](https://docs.conda.io/en/latest/miniconda.html)). Then, open a terminal (or Anaconda prompt)
 and install the `carwatch` package via pip:
-Installation from local repository copy:
+
 ```bash
 pip install carwatch
 ```
@@ -77,9 +78,9 @@ poetry install
 
 The core functionalities of the `carwatch` package are
 
-* creating a PDF with printable barcode labels for the saliva sampling tubes (Preparation),
 * creating a QR-Code for configuring the [CARWatch App](https://github.com/mad-lab-fau/carwatch-app) (Preparation),
-* and extracting the sampling times for the CARWAtch App log recordings (Postprocessing).
+* creating a PDF with printable barcode labels for the saliva sampling tubes (Preparation),
+* and extracting the sampling times for the CARWatch app log recordings (Postprocessing).
 
 ### Programmatic Usage
 
