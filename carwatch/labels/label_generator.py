@@ -10,8 +10,8 @@ import cairosvg
 import numpy as np
 
 from carwatch.labels.print_layout import AveryZweckformJ4791Layout, PrintLayout
-from carwatch.utils.study import Study
 from carwatch.utils import assert_is_dir, sanitize_str_for_tex, tex_to_pdf, write_to_file
+from carwatch.utils.study import Study
 
 
 class LabelGenerator:

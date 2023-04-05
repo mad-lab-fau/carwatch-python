@@ -77,7 +77,7 @@ class QrCodeGenerator:
         qr_img = self._generate_qr_code()
         self._save_qr_img(qr_img)
 
-    def _generate_qr_code(self) -> qrcode.image.pil.PilImage:
+    def _generate_qr_code(self) -> PilImage:
         """Generate a QR-Code with the study information.
 
         This method translates the study data into a QR-Code. The information is encoded in the following format:
