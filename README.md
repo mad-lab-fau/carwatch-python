@@ -18,9 +18,13 @@ them by scanning a barcode on the respective sampling tube as well as a Python p
 
 
 ## Features
-In order to use CARWatch, you need to prepare the study materials and configure the app. 
 
-All these features are provided by `carwatch` which offers a  user-friendly command-line interface 
+In order to use CARWatch, you need to prepare the study materials and configure the app. The whole workflow is
+illustrated in the following figure:
+
+<img src="./docs/img/carwarch_overview.png" width="600" alt="CARWatch Workflow">
+
+All these features are provided by `carwatch` which offers a user-friendly command-line interface (CLI)
 for the following tasks: 
 1. **Setting up a CAR study.**   
 This includes: 
@@ -41,7 +45,6 @@ This includes:
    * Extracting the self-reported awakening times (if available)
    * Merging the time information with the cortisol measures
 
-![CARWatch Overview](docs/img/carwatch_overview.png)
 
 
 
