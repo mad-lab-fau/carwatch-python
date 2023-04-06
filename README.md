@@ -41,6 +41,9 @@ This includes:
    * Extracting the self-reported awakening times (if available)
    * Merging the time information with the cortisol measures
 
+![CARWatch Overview](docs/img/carwatch_overview.png)
+
+
 
 
 ## Installation
