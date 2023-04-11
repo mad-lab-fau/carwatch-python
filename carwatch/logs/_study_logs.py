@@ -1,11 +1,16 @@
 """Log files from a complete study."""
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Dict, Literal, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
 
 import pandas as pd
 
 from carwatch.logs import ParticipantLogs
 from carwatch.utils._types import path_t
+
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
 
 
 class StudyLogs:
@@ -46,7 +51,7 @@ class StudyLogs:
     @classmethod
     def from_folder(
         cls, folder_path: path_t, error_handling: Optional[Literal["ignore", "warn", "raise"]] = "ignore"
-    ) -> "StudyLogs":
+    ) -> StudyLogs:
         """Create a :class:`~carwatch.logs.StudyLogs` object from a folder containing log files.
 
         Parameters
@@ -146,7 +151,6 @@ class StudyLogs:
         :class:`~pandas.DataFrame`
             Android versions of the different study participants as a :class:`~pandas.DataFrame`
         """
-
         return self._get_metadata("android_version")
 
     @property
@@ -158,7 +162,6 @@ class StudyLogs:
         :class:`~pandas.DataFrame`
             App versions of the different study participants as a :class:`~pandas.DataFrame`
         """
-
         return self._get_metadata("app_version")
 
     @property
@@ -170,7 +173,6 @@ class StudyLogs:
         :class:`~pandas.DataFrame`
             Phone models of the different study participants as a :class:`~pandas.DataFrame`
         """
-
         return self._get_metadata("phone_model")
 
     @property
@@ -182,7 +184,6 @@ class StudyLogs:
         :class:`~pandas.DataFrame`
             Phone manufacturers of the different study participants as a :class:`~pandas.DataFrame`
         """
-
         return self._get_metadata("phone_manufacturer")
 
     def _get_metadata(self, metadata_type: str):
@@ -207,19 +208,19 @@ class StudyLogs:
         """
         return pd.DataFrame(self._get_metadata(metadata).value_counts(), columns=["count"])
 
-    def get_metadata_plot(self, metadata: str, **kwargs) -> Tuple["plt.Figure", "plt.Axes"]:
+    def get_metadata_plot(self, metadata: str, **kwargs) -> Tuple[plt.Figure, plt.Axes]:
         try:
             import matplotlib.pyplot as plt
             import seaborn as sns
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
                 "This function requires matplotlib and seaborn to be installed. "
                 "Please install them either manually or by installing the 'carwatch' package "
                 "using 'pip install carwatch[plotting]'."
-            )
+            ) from e
         ax = kwargs.pop("ax", None)
         if ax is None:
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=kwargs.pop("figsize", None))
         else:
             fig = ax.get_figure()
 

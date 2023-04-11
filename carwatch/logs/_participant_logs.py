@@ -783,16 +783,16 @@ class ParticipantLogs:
 
         """
         list_data = []
+        if include_awakening_times:
+            data = self.awakening_times(add_day_id=add_day_id)
+            data = data[["awakening_time", "awakening_type"]]
+            list_data.append(data)
         if include_sampling_times:
             data = self.sampling_times(include_evening_sample=include_evening_sample, add_day_id=add_day_id)
             data = data[["sampling_time"]]
             data = data.droplevel("saliva_type")
             data = data.unstack(["saliva_id"])
             data.columns = ["_".join(map(str, col)) for col in data.columns]
-            list_data.append(data)
-        if include_awakening_times:
-            data = self.awakening_times(add_day_id=add_day_id)
-            data = data[["awakening_time", "awakening_type"]]
             list_data.append(data)
 
         return pd.concat(list_data, axis=1)
