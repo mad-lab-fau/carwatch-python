@@ -1,6 +1,7 @@
 """Example of how to generate labels for a study."""
 
-from carwatch.labels import CustomLayout, LabelGenerator
+from carwatch.labels import LabelGenerator
+from carwatch.labels.print_layout import CustomLayout
 from carwatch.utils import Study
 
 if __name__ == "__main__":
@@ -22,4 +23,4 @@ if __name__ == "__main__":
         inter_col=0.2,
         inter_row=0.5,
     )
-    generator.generate(output_dir=".", debug=True, layout=layout)
+    generator.generate(output_dir=".", debug=False, layout=layout)

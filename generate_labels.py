@@ -7,7 +7,8 @@ from typing import Optional, Sequence, Union
 
 import click
 
-from carwatch.labels import CustomLayout, LabelGenerator
+from carwatch.labels import LabelGenerator
+from carwatch.labels.print_layout import CustomLayout
 from carwatch.qr_codes import QrCodeGenerator
 from carwatch.utils import Condition, Study, validate_mail_input, validate_saliva_distances, validate_subject_path
 from carwatch.utils.click_helper import NumericChoice, get_file_name

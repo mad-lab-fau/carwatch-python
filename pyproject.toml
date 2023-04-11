@@ -56,7 +56,6 @@ exclude = '''
 
 [tool.ruff]
 line-length = 120
-update-check = true
 target-version = "py38"
 
 select = [
@@ -119,6 +118,8 @@ select = [
 ]
 
 ignore = [
+    # No explicit stacklevel keyword argument found in logging calls
+    "B028",
     # controversial
     "B006",
     # controversial
@@ -136,10 +137,14 @@ ignore = [
     "RET504",
     # Abstract raise into inner function
     "TRY301",
+    # Avoid specifying long messages outside the exception class
+    "TRY003",
     # Use type-checking block
     "TCH001",
     "TCH002",
     "TCH003",
+    # .pivot_table is preferred to .pivot or .unstack; provides same functionality
+    "PD010",
     # df as varaible name
     "PD901",
     # melt over stack
@@ -156,6 +161,8 @@ exclude = [
     "examples"
 ]
 
+[tool.ruff.pylint]
+max-args = 10
 
 [tool.ruff.pydocstyle]
 convention = "numpy"

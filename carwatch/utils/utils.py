@@ -47,7 +47,7 @@ def write_to_file(file: Path, content: str):
     """
     # ensure pathlib
     file_name = Path(file)
-    with open(file_name, "w+", encoding="utf-8") as fp:
+    with file_name.open(mode="w+", encoding="utf-8") as fp:
         fp.write(content)
 
 

@@ -183,7 +183,7 @@ class LabelGenerator:
             ]
         )
         for path in barcode_paths:
-            with open(path, "rb") as file:
+            with Path(path).open(mode="rb") as file:
                 cairosvg.svg2pdf(file_obj=file, write_to=path.replace("svg", "pdf"))
         return barcode_paths
 
@@ -257,29 +257,29 @@ class LabelGenerator:
         subject_name = self.study.subject_names[subject_index - 1]
         subject_name = sanitize_str_for_tex(subject_name)
         # label is realized with latex table
-        label_head = r"\genericlabel" + "\n" + r"\begin{tabular}"
-        label_foot = r"\end{tabular}" + "\n\n"
+        label_head = "\\genericlabel\n\\begin{tabular}"
+        label_foot = "\\end{tabular}\n\n"
         table_content = ""
         if self.has_barcode:
             # create table with 2 columns
-            table_properties = r"{m{0.45\linewidth} m{0.4\linewidth}}" + "\n"
+            table_properties = "{m{0.45\\linewidth} m{0.4\\linewidth}}\n"
             # add barcode to first column
             table_content += (
-                rf"\includegraphics[height={self.layout.get_label_height() - 4}mm,width="
-                + rf"\linewidth,keepaspectratio]{{img/barcode_{subject_index:03d}{day:02d}{sample:02d}.pdf}} &"
+                f"\\includegraphics[height={self.layout.get_label_height() - 4}mm,"
+                f"width=\\linewidth,keepaspectratio]{{img/barcode_{subject_index:03d}{day:02d}{sample:02d}.pdf}} &"
             )
+
             font_size = r"\tiny"  # decrease font size to make it fit next to barcode
         else:
             # create table with only one column
             table_properties = r"{c}"
             font_size = ""  # use default font size
             # center text in label
-            label_head = r"\genericlabel" + "\n" + r"\begin{center}" + "\n" + r"\begin{tabular}"
-            label_foot = r"\end{tabular}" + "\n" + r"\end{center}" + "\n\n"
-        if self.study.has_evening_sample:
+            label_head = "\\genericlabel\n\\begin{center}\n\\begin{tabular}"
+            label_foot = "\\end{tabular}\n\\end{center}\n\n"
+        if self.study.has_evening_sample and all([sample == self.study.num_samples - 1]):
             # if last sample of the day is evening sample, it is marked with "A"
-            if all([sample == self.study.num_samples - 1]):
-                sample_name = "A"
+            sample_name = "A"
         if self.add_name:
             delimiter = r"\_"
             if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
@@ -289,50 +289,46 @@ class LabelGenerator:
             if self.has_barcode:
                 # insert infos as one row in the second column
                 table_content += (
-                    rf"{font_size}{{{study_name}{delimiter}{subject_name}"
-                    + rf"\newline T{day}\_{self.sample_prefix}{sample_name}}}"
-                    + "\n"
+                    f"{font_size}{{{study_name}{delimiter}{subject_name}"
+                    f"\\newline T{day}\\_{self.sample_prefix}{sample_name}}}\n"
+                )
+            elif len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
+                # insert infos centered in two rows
+                table_content += (
+                    f"{font_size}{{{study_name}}}\\\\{{{subject_name}\\_T{day}\\_{self.sample_prefix}{sample_name}}}\n"
                 )
             else:
-                # insert infos centered in two rows
-                if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
-                    table_content += (
-                        rf"{font_size}{{{study_name}}}\\{{{subject_name}\_T{day}\_{self.sample_prefix}{sample_name}}}"
-                        + "\n"
-                    )
-                else:
-                    table_content += (
-                        rf"{font_size}{{{study_name}\_{subject_name}}}\\{{T{day}\_{self.sample_prefix}{sample_name}}}"
-                        + "\n"
-                    )
+                table_content += (
+                    f"{font_size}{{{study_name}\\_{subject_name}}}\\\\{{T{day}\\_{self.sample_prefix}{sample_name}}}\n"
+                )
         else:
             # add day and sample to second column
-            table_content += rf"\centering{font_size}{{T{day}\_{self.sample_prefix}{sample_name}}}" + "\n"
+            table_content += f"\\centering{font_size}{{T{day}\\_{self.sample_prefix}{sample_name}}}\n"
         label_tex = label_head + table_properties + table_content + label_foot
         return label_tex
 
     def _generate_tex_label_properties(self, debug: bool) -> str:
         """Define arrangement of labels based on specified :obj:`~carwatch.labels.PrintLayout`."""
         tex_properties = ""
-        tex_properties += rf"\LabelCols={self.layout.num_cols}" + "\n"  # number of columns of labels per page
-        tex_properties += rf"\LabelRows={self.layout.num_rows}" + "\n"  # number of rows of labels per page
-        tex_properties += rf"\LeftPageMargin={self.layout.left_margin}mm" + "\n"  # margin to the left
-        tex_properties += rf"\RightPageMargin={self.layout.right_margin}mm" + "\n"  # margin to the right
-        tex_properties += rf"\TopPageMargin={self.layout.top_margin}mm" + "\n"  # margin to the top
-        tex_properties += rf"\BottomPageMargin={self.layout.bottom_margin}mm" + "\n"  # margin to the bottom
-        tex_properties += rf"\InterLabelColumn={self.layout.inter_col}mm" + "\n"  # gap between columns of labels
-        tex_properties += rf"\InterLabelRow={self.layout.inter_row}mm" + "\n"  # gap between rows of labels
-        tex_properties += r"\LeftLabelBorder=1mm" + "\n"  # minimum gap between text and label border on the left
-        tex_properties += r"\RightLabelBorder=1mm" + "\n"  # minimum gap between text and label border on the right
-        tex_properties += r"\TopLabelBorder=2mm" + "\n"  # minimum gap between text and label border on the top
-        tex_properties += r"\BottomLabelBorder=2mm" + "\n"  # minimum gap between text and label border on the bottom
+        tex_properties += f"\\LabelCols={self.layout.num_cols}\n"  # number of columns of labels per page
+        tex_properties += f"\\LabelRows={self.layout.num_rows}\n"  # number of rows of labels per page
+        tex_properties += f"\\LeftPageMargin={self.layout.left_margin}mm\n"  # margin to the left
+        tex_properties += f"\\RightPageMargin={self.layout.right_margin}mm\n"  # margin to the right
+        tex_properties += f"\\TopPageMargin={self.layout.top_margin}mm\n"  # margin to the top
+        tex_properties += f"\\BottomPageMargin={self.layout.bottom_margin}mm\n"  # margin to the bottom
+        tex_properties += f"\\InterLabelColumn={self.layout.inter_col}mm\n"  # gap between columns of labels
+        tex_properties += f"\\InterLabelRow={self.layout.inter_row}mm\n"  # gap between rows of labels
+        tex_properties += "\\LeftLabelBorder=1mm\n"  # minimum gap between text and label border on the left
+        tex_properties += "\\RightLabelBorder=1mm\n"  # minimum gap between text and label border on the right
+        tex_properties += "\\TopLabelBorder=2mm\n"  # minimum gap between text and label border on the top
+        tex_properties += "\\BottomLabelBorder=2mm\n"  # minimum gap between text and label border on the bottom
         if debug:
-            tex_properties += r"\LabelGridtrue" + "\n"  # draw label borders
+            tex_properties += "\\LabelGridtrue\n"  # draw label borders
         return tex_properties
 
     def _generate_tex_body(self):
         """Iterate over all barcodes and generate corresponding LaTeX code."""
-        tex_head = r"\begin{labels}" + "\n"
+        tex_head = "\\begin{labels}\n"
         tex_foot = r"\end{labels}"
         tex_body = ""
         for sample in self.barcode_ids:

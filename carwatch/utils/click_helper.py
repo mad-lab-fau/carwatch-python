@@ -36,6 +36,17 @@ class Condition(click.Option):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):
+        """Handle parse result.
+
+        Parameters
+        ----------
+        ctx : :class:`click.Context`
+            the context object
+        opts : dict
+            the options that have been parsed so far
+        args : list
+            the arguments that have been parsed so far
+        """
         is_condition = ctx.params[self.condition]
 
         if not is_condition:
@@ -76,6 +87,18 @@ class NumericChoice(click.Option):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):
+        """Handle parse result.
+
+        Parameters
+        ----------
+        ctx : :class:`click.Context`
+            the context object
+        opts : dict
+            the options that have been parsed so far
+        args : list
+            the arguments that have been parsed so far
+
+        """
         chosen_number = ctx.params[self.option]
         is_positive = self.option_map[chosen_number]
         if is_positive:
@@ -85,16 +108,50 @@ class NumericChoice(click.Option):
         return super().handle_parse_result(ctx, opts, args)
 
 
-def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
+def validate_subject_path(ctx, param, value) -> str:  # noqa: ARG001
+    """Validate subject path.
+
+    Parameters
+    ----------
+    ctx : :class:`click.Context`
+        the context object
+    param : :class:`click.Parameter`
+        the parameter object
+    value : str
+        the value of the parameter
+
+    Returns
+    -------
+    str
+        the validated value of the parameter
+
+    """
     if value:
         try:
             assert_file_ending(Path(value), [".csv", ".txt"])
         except ValueError as e:
-            raise click.BadParameter(str(e))
+            raise click.BadParameter(str(e)) from e
     return value
 
 
-def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument
+def validate_mail_input(ctx, param, value):  # noqa: ARG001
+    """Validate mail input.
+
+    Parameters
+    ----------
+    ctx : :class:`click.Context`
+        the context object
+    param : :class:`click.Parameter`
+        the parameter object
+    value : str
+        the value of the parameter
+
+    Returns
+    -------
+    str
+        the validated value of the parameter
+
+    """
     if value:
         email_regex = r"[^@]+@[^@]+\.[^@]+"  # pattern <...>@<...>.<...>
         if not re.fullmatch(email_regex, value):
@@ -102,7 +159,24 @@ def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument
     return value
 
 
-def validate_saliva_distances(ctx, param, value):  # pylint:disable=unused-argument
+def validate_saliva_distances(ctx, param, value):  # noqa: ARG001
+    """Validate saliva distances.
+
+    Parameters
+    ----------
+    ctx : :class:`click.Context`
+        the context object
+    param : :class:`click.Parameter`
+        the parameter object
+    value : str
+        the value of the parameter
+
+    Returns
+    -------
+    str
+        the validated value of the parameter
+
+    """
     if value:
         value = value.replace(" ", "")  # trim spaces
         if "," in value:
@@ -110,9 +184,8 @@ def validate_saliva_distances(ctx, param, value):  # pylint:disable=unused-argum
             for dist in distances:
                 if not dist.isdigit():
                     raise click.BadParameter("Saliva distances need to be comma-separated integers!")
-        else:
-            if not value.isdigit():
-                raise click.BadParameter("Saliva distance needs to be an integer!")
+        elif not value.isdigit():
+            raise click.BadParameter("Saliva distance needs to be an integer!")
     return value
 
 

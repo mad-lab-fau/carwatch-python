@@ -275,11 +275,11 @@ class ParticipantLogs:
         subject_dict = self.get_extras_for_log_action("subject_id_set")
         try:
             self.subject_id = subject_dict["subject_id"]
-        except KeyError:
+        except KeyError as e:
             if self.error_handling == "warn":
                 warnings.warn("Action 'Subject ID Set' not found - Log Data may be invalid!")
             elif self.error_handling == "raise":
-                raise LogDataInvalidError("Action 'Subject ID Set' not found - Log Data may be invalid!")
+                raise LogDataInvalidError("Action 'Subject ID Set' not found - Log Data may be invalid!") from e
         # App Metadata
         self.app_metadata = self.get_extras_for_log_action("app_metadata")
         # Phone Metadata
@@ -666,18 +666,19 @@ class ParticipantLogs:
         """
         data_split = {}
         for day, data in self.split_sampling_days(return_dict=True).items():
-            data = self.filter_logs(data=data, action=["barcode_scanned"])
-            if len(data) == 0:
+            data_filt = self.filter_logs(data=data, action=["barcode_scanned"])
+            if len(data_filt) == 0:
                 continue
             # expand extras, which is a json string
-            extras = data["extras"].apply(json.loads)
+            extras = data_filt["extras"].apply(json.loads)
             # convert extras to dataframe
             df = pd.DataFrame(list(extras.values))
             df = df[["saliva_id"]]
             # add new columns
             df = df.assign(
-                **{"timestamp": data.index, "sampling_time": data.index.strftime("%H:%M:%S"), "saliva_type": "morning"}
+                timestamp=data_filt.index, sampling_time=data_filt.index.strftime("%H:%M:%S"), saliva_type="morning"
             )
+
             # assign morning or evening "saliva_type" to each saliva_id
             df.loc[df["saliva_id"] >= self.num_saliva_samples, "saliva_type"] = "evening"
             # find the last barcode_scanned event for each saliva_id
@@ -694,7 +695,7 @@ class ParticipantLogs:
         if add_day_id:
             # assign a unique id to each night, starting with 1
             date_vals = data_concat.index.get_level_values("date")
-            data_concat = data_concat.assign(**{"day_id": date_vals.unique().searchsorted(date_vals) + 1})
+            data_concat = data_concat.assign(day_id=date_vals.unique().searchsorted(date_vals) + 1)
             data_concat = data_concat.set_index("day_id", append=True)
         return data_concat
 
@@ -725,7 +726,7 @@ class ParticipantLogs:
                 df = pd.DataFrame(list(extras.values))
                 df.index = data_filter.index
                 df = data_filter.drop(columns=["extras"]).join(df)
-                df = df.assign(**{"awakening_time": data_filter.index.strftime("%H:%M:%S")})
+                df = df.assign(awakening_time=data_filter.index.strftime("%H:%M:%S"))
                 df = df.set_index("action", append=True)
                 data_action.append(df)
 
@@ -750,7 +751,7 @@ class ParticipantLogs:
         data_concat = data_concat.reset_index("timestamp")
 
         if add_day_id:
-            data_concat = data_concat.assign(**{"day_id": range(1, len(data_concat) + 1)})
+            data_concat = data_concat.assign(day_id=range(1, len(data_concat) + 1))
             data_concat = data_concat.set_index("day_id", append=True)
         return data_concat
 

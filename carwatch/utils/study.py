@@ -100,11 +100,11 @@ class Study:
                 subject_data = pd.read_csv(subject_path)
                 subject_ids = subject_data[subject_column]
                 return subject_ids.to_list()
-            return None
-        # _assert_file_ending throws value error if file has wrong ending/doesn't exist
+            # _assert_file_ending throws value error if file has wrong ending/doesn't exist
         except ValueError as e:
             print(e)
             sys.exit(1)
+        return None
 
     def get_subject_name(self, subject_index: int) -> str:
         """Return the name of a subject.
