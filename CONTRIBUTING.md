@@ -201,7 +201,7 @@ $ poe
 docs                 Build the html docs using Sphinx.
 format               Reformat all files using black.
 format_check         Check, but not change, formatting using black.
-lint                 Lint all files with Prospector.
+lint                 Lint all files with ruff.
 test                 Run Pytest with coverage.
 update_version       Bump the version in pyproject.toml and carwatch.__init__. Pass the options "major", "minor", or "patch" with the `-v` argument to bump the major, minor, or patch version, respectively.
 ```
@@ -225,12 +225,11 @@ Black can also be integrated [into your editor](https://black.readthedocs.io/en/
 if you do not want to run it from the command line.
 Because, it is so easy, we also use *black* to format the test-suite.
 
-For everything *black* can not handle, we use [prospector](http://prospector.landscape.io/en/master/) to handle all 
-other **linting** tasks. *Prospector* runs `pylint`, `pep257`, and `pyflakes` with custom rules to ensure consistent 
-code and docstring style.
+For everything *black* can not handle, we use [ruff](https://github.com/charliermarsh/ruff) to handle all 
+other **linting** tasks to ensure consistent code and docstring style.
 
-For **documentation** we follow the numpy doc-string guidelines and auto-build our API documentation using *Sphinx*.
-To make your life easier, you should also set your IDE tools to support the numpy docstring conventions.
+For **documentation** we follow the numpy doc-string guidelines. To make your life easier, you should also set your 
+IDE tools to support the numpy docstring conventions.
 
 ----
 **Note**: In order to build the documentation, you need to additionally install [pandoc](https://pandoc.org/installing.html).
