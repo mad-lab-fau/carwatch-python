@@ -21,6 +21,14 @@ CairoSVG = "^2.5.2"
 click = "^8.1.3"
 pandas = "^1.5.0"
 qrcode = "^7.3.1"
+matplotlib = { version = "^3.5.0", optional = true }
+seaborn = { version = "^0.11.2", optional = true }
+ipywidgets = {version = "^8", optional = true}
+ipympl = {version = "^0.9", optional = true}
+fau_colors = {version = "^1.6.0", optional=true}
+
+[tool.poetry.extras]
+plotting = ["matplotlib", "seaborn", "ipywidgets", "ipympl", "fau_colors"]
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"

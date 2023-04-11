@@ -1,6 +1,6 @@
 """Log files from a complete study."""
 from pathlib import Path
-from typing import Dict, Literal, Optional
+from typing import Dict, Literal, Optional, Tuple
 
 import pandas as pd
 
@@ -136,3 +136,99 @@ class StudyLogs:
             },
             names=["subject"],
         )
+
+    @property
+    def android_versions(self):
+        """Return the Android versions of the different study participants as a :class:`~pandas.DataFrame`.
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
+            Android versions of the different study participants as a :class:`~pandas.DataFrame`
+        """
+
+        return self._get_metadata("android_version")
+
+    @property
+    def app_versions(self):
+        """Return the app versions of the different study participants as a :class:`~pandas.DataFrame`.
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
+            App versions of the different study participants as a :class:`~pandas.DataFrame`
+        """
+
+        return self._get_metadata("app_version")
+
+    @property
+    def phone_models(self):
+        """Return the phone models of the different study participants as a :class:`~pandas.DataFrame`.
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
+            Phone models of the different study participants as a :class:`~pandas.DataFrame`
+        """
+
+        return self._get_metadata("phone_model")
+
+    @property
+    def phone_manufacturers(self):
+        """Return the phone manufacturers of the different study participants as a :class:`~pandas.DataFrame`.
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
+            Phone manufacturers of the different study participants as a :class:`~pandas.DataFrame`
+        """
+
+        return self._get_metadata("phone_manufacturer")
+
+    def _get_metadata(self, metadata_type: str):
+        data = {key: getattr(logs, metadata_type) for key, logs in self._study_logs.items()}
+        data = pd.Series(data).to_frame(name=metadata_type)
+        data.index.name = "subject"
+        return data
+
+    def get_metadata_stats(self, metadata: str) -> pd.DataFrame:
+        """Return the number of participants for each value of the given metadata.
+
+        Parameters
+        ----------
+        metadata : str
+            metadata to get the number of participants for each value of
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
+            number of participants for each value of the given metadata
+
+        """
+        return pd.DataFrame(self._get_metadata(metadata).value_counts(), columns=["count"])
+
+    def get_metadata_plot(self, metadata: str, **kwargs) -> Tuple["plt.Figure", "plt.Axes"]:
+        try:
+            import matplotlib.pyplot as plt
+            import seaborn as sns
+        except ImportError:
+            raise ImportError(
+                "This function requires matplotlib and seaborn to be installed. "
+                "Please install them either manually or by installing the 'carwatch' package "
+                "using 'pip install carwatch[plotting]'."
+            )
+        ax = kwargs.pop("ax", None)
+        if ax is None:
+            fig, ax = plt.subplots()
+        else:
+            fig = ax.get_figure()
+
+        data = self.get_metadata_stats(metadata)
+
+        palette = kwargs.pop("palette", sns.cubehelix_palette(len(data), start=0.5, rot=-0.75))
+        ax = sns.barplot(data=data.reset_index(), x=metadata, y="count", ax=ax, palette=palette, **kwargs)
+
+        if metadata in ["phone_model", "log_dates"]:
+            ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+
+        return fig, ax
