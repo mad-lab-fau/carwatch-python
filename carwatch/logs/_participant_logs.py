@@ -3,11 +3,10 @@ import json
 import warnings
 import zipfile
 from pathlib import Path
-from typing import Dict, Optional, Sequence, Union, Any, IO
+from typing import IO, Any, Dict, Literal, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
-from typing_extensions import Literal
 
 from carwatch.utils._datatype_validation_helper import _assert_file_extension, _assert_is_dtype
 from carwatch.utils._types import path_t, str_t
@@ -278,16 +277,16 @@ class ParticipantLogs:
             self.subject_id = subject_dict["subject_id"]
         except KeyError:
             if self.error_handling == "warn":
-                warnings.warn("Action 'Subject ID Set' not found – Log Data may be invalid!")
+                warnings.warn("Action 'Subject ID Set' not found - Log Data may be invalid!")
             elif self.error_handling == "raise":
-                raise LogDataInvalidError("Action 'Subject ID Set' not found – Log Data may be invalid!")
+                raise LogDataInvalidError("Action 'Subject ID Set' not found - Log Data may be invalid!")
         # App Metadata
         self.app_metadata = self.get_extras_for_log_action("app_metadata")
         # Phone Metadata
         self.phone_metadata = self.get_extras_for_log_action("phone_metadata")
 
         # Log Info
-        self.log_dates = np.array([ts for ts in self._data.index.normalize().unique()])
+        self.log_dates = np.array(list(self._data.index.normalize().unique()))
 
     #
     #     def _ipython_display_(self):
@@ -308,7 +307,7 @@ class ParticipantLogs:
     #         display(Markdown("App Version: **{}**".format(self.app_version)))
     #         display(Markdown("Android Version: **{}**".format(self.android_version)))
     #         display(Markdown("Phone: **{}**".format(self.model)))
-    #         display(Markdown("Logging Days: **{} – {}**".format(str(self.start_date), str(self.end_date))))
+    #         display(Markdown("Logging Days: **{} - {}**".format(str(self.start_date), str(self.end_date))))
     #
 
     @property
@@ -479,11 +478,13 @@ class ParticipantLogs:
 
         return data.loc[data.index.normalize() == date]
 
-    def split_sampling_days(self, split_night: Optional[bool] = True) -> Dict[str, pd.DataFrame]:
+    def split_sampling_days(
+        self, split_night: Optional[bool] = True, return_dict: Optional[bool] = False
+    ) -> Dict[str, pd.DataFrame]:
         """Split continuous log data into individual sampling days.
 
         This function splits data into individual sampling days.
-        The split is performed at 6pm because that's the time of day where the probability of
+        The split is performed at 6pm because that's the time of day when the probability of
         sleeping is the lowest.
 
         Parameters
@@ -495,6 +496,9 @@ class ParticipantLogs:
             If ``False``, split data into *days*, assuming that all samples taken at one day belong to the same day.
             This is the typical way if cortisol daily profiles with cortisol samples over the whole day are assessed.
             Default: ``True``
+        return_dict : bool, optional
+            If ``True``, return a dictionary with sampling date (keys) and log dataframes (values). If ``False``,
+            a concatenated dataframe is returned. Default: ``False``
 
 
         Returns
@@ -510,12 +514,12 @@ class ParticipantLogs:
         date_diff = np.append(date_diff[0], date_diff)
         idx_date = np.where(date_diff)[0]
 
-        if split_night:
-            dict_data = self._split_night(data, idx_date)
-        else:
-            dict_data = self._split_day(data, idx_date)
+        dict_data = self._split_night(data, idx_date) if split_night else self._split_day(data, idx_date)
 
-        return dict_data
+        if return_dict:
+            return dict_data
+
+        return pd.concat(dict_data, names=["date"])
 
     @staticmethod
     def _split_night(data: pd.DataFrame, idx_date: np.ndarray) -> Dict[str, pd.DataFrame]:
@@ -642,7 +646,7 @@ class ParticipantLogs:
     def sampling_times(
         self,
         include_evening_sample: Optional[bool] = True,
-        add_night_id: Optional[bool] = False,
+        add_day_id: Optional[bool] = True,
     ) -> pd.DataFrame:
         """Get sampling times.
 
@@ -651,8 +655,8 @@ class ParticipantLogs:
         include_evening_sample : bool, optional
             ``True`` to include evening sampling times, ``False`` to only include morning sampling times.
             Default: ``True``
-        add_night_id : bool, optional
-            ``True`` to add a column with the night id. Default: ``False``
+        add_day_id : bool, optional
+            ``True`` to add an index level with an increasing day id. Default: ``True``
 
         Returns
         -------
@@ -661,7 +665,7 @@ class ParticipantLogs:
 
         """
         data_split = {}
-        for day, data in self.split_sampling_days().items():
+        for day, data in self.split_sampling_days(return_dict=True).items():
             data = self.filter_logs(data=data, action=["barcode_scanned"])
             if len(data) == 0:
                 continue
@@ -687,16 +691,29 @@ class ParticipantLogs:
         if not include_evening_sample:
             data_concat = data_concat.drop("evening", level="saliva_type")
 
-        if add_night_id:
+        if add_day_id:
             # assign a unique id to each night, starting with 1
             date_vals = data_concat.index.get_level_values("date")
-            data_concat = data_concat.assign(**{"night_id": date_vals.unique().searchsorted(date_vals) + 1})
-            data_concat = data_concat.set_index("night_id", append=True)
+            data_concat = data_concat.assign(**{"day_id": date_vals.unique().searchsorted(date_vals) + 1})
+            data_concat = data_concat.set_index("day_id", append=True)
         return data_concat
 
-    def awakening_times(self, add_night_id: Optional[bool] = True) -> pd.DataFrame:
+    def awakening_times(self, add_day_id: Optional[bool] = True) -> pd.DataFrame:
+        """Extract awakening times from log data.
+
+        Parameters
+        ----------
+        add_day_id : bool, optional
+            ``True`` to add an index level with an increasing day id. Default: ``True``
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
+            dataframe with awakening times
+
+        """
         data_split = {}
-        for day, data in self.split_sampling_days().items():
+        for day, data in self.split_sampling_days(return_dict=True).items():
             data_action = []
             for log_action in ["spontaneous_awakening", "alarm_stop"]:
                 data_filter = self.filter_logs(data=data, action=log_action)
@@ -732,9 +749,9 @@ class ParticipantLogs:
         data_concat = pd.concat(data_split, names=["date"])
         data_concat = data_concat.reset_index("timestamp")
 
-        if add_night_id:
-            data_concat = data_concat.assign(**{"night_id": range(1, len(data_concat) + 1)})
-            data_concat = data_concat.set_index("night_id", append=True)
+        if add_day_id:
+            data_concat = data_concat.assign(**{"day_id": range(1, len(data_concat) + 1)})
+            data_concat = data_concat.set_index("day_id", append=True)
         return data_concat
 
     def export_times(
@@ -742,21 +759,38 @@ class ParticipantLogs:
         include_sampling_times: Optional[bool] = True,
         include_evening_sample: Optional[bool] = True,
         include_awakening_times: Optional[bool] = True,
-        add_night_id: Optional[bool] = True,
+        add_day_id: Optional[bool] = True,
     ) -> pd.DataFrame:
-        """Export sampling and awakening times."""
+        """Export sampling and/or awakening times from the participant's logs.
+
+        Parameters
+        ----------
+        include_sampling_times : bool, optional
+            ``True`` to include sampling times, ``False`` to exclude. Default: ``True``
+        include_evening_sample : bool, optional
+            ``True`` to include evening sampling times, ``False`` to only include morning sampling times.
+            Default: ``True``
+        include_awakening_times : bool, optional
+            ``True`` to include awakening times, ``False`` to exclude. Default: ``True``
+        add_day_id : bool, optional
+            ``True`` to add an index level with the day id. Default: ``False``
+
+        Returns
+        -------
+        :class:`~pandas.DataFrame`
+            dataframe with sampling and/or awakening times
+
+        """
         list_data = []
         if include_sampling_times:
-            data = self.sampling_times(include_evening_sample=include_evening_sample, add_night_id=add_night_id)
-            if not include_evening_sample:
-                data = data.drop(index="evening", level="saliva_type")
+            data = self.sampling_times(include_evening_sample=include_evening_sample, add_day_id=add_day_id)
             data = data[["sampling_time"]]
             data = data.droplevel("saliva_type")
             data = data.unstack(["saliva_id"])
             data.columns = ["_".join(map(str, col)) for col in data.columns]
             list_data.append(data)
         if include_awakening_times:
-            data = self.awakening_times(add_night_id=add_night_id)
+            data = self.awakening_times(add_day_id=add_day_id)
             data = data[["awakening_time", "awakening_type"]]
             list_data.append(data)
 
