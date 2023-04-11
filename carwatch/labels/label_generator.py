@@ -252,10 +252,7 @@ class LabelGenerator:
         study_name = sanitize_str_for_tex(self.study.study_name)
         day = int(barcode_id // 100) % 100
         sample = barcode_id % 100
-        if self.study.start_sample_from_zero:
-            sample_name = barcode_id % 100
-        else:
-            sample_name = (barcode_id + 1) % 100
+        sample_name = barcode_id % 100 if self.study.start_sample_from_zero else (barcode_id + 1) % 100
         subject_index = int(barcode_id // 1e4)
         subject_name = self.study.subject_names[subject_index - 1]
         subject_name = sanitize_str_for_tex(subject_name)

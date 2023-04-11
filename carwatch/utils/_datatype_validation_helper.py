@@ -1,6 +1,6 @@
 """Internal helpers for dataset validation."""
 from pathlib import Path
-from typing import Optional, Sequence, Union, Tuple
+from typing import Optional, Sequence, Tuple, Union
 
 from carwatch.utils._types import path_t
 from carwatch.utils.exceptions import FileExtensionError, ValidationError
@@ -30,7 +30,7 @@ def _assert_is_dir(path: path_t, raise_exception: Optional[bool] = True) -> Opti
     file_name = Path(path)
     if not file_name.is_dir():
         if raise_exception:
-            raise ValueError("The path '{}' is expected to be a directory, but it's not!".format(path))
+            raise ValueError(f"The path '{path}' is expected to be a directory, but it's not!")
         return False
 
     return True

@@ -85,7 +85,7 @@ class NumericChoice(click.Option):
         return super().handle_parse_result(ctx, opts, args)
 
 
-def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument # noqa: C901
+def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument
     if value:
         try:
             assert_file_ending(Path(value), [".csv", ".txt"])
@@ -94,7 +94,7 @@ def validate_subject_path(ctx, param, value):  # pylint:disable=unused-argument 
     return value
 
 
-def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument # noqa: C901
+def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument
     if value:
         email_regex = r"[^@]+@[^@]+\.[^@]+"  # pattern <...>@<...>.<...>
         if not re.fullmatch(email_regex, value):
@@ -102,7 +102,7 @@ def validate_mail_input(ctx, param, value):  # pylint:disable=unused-argument # 
     return value
 
 
-def validate_saliva_distances(ctx, param, value):  # pylint:disable=unused-argument # noqa: C901
+def validate_saliva_distances(ctx, param, value):  # pylint:disable=unused-argument
     if value:
         value = value.replace(" ", "")  # trim spaces
         if "," in value:
