@@ -2,6 +2,7 @@
 import json
 import warnings
 import zipfile
+from itertools import product
 from pathlib import Path
 from typing import IO, Any, Dict, Literal, Optional, Sequence, Union
 
@@ -856,10 +857,26 @@ class ParticipantLogs:
             data.columns = ["_".join(map(str, col)) for col in data.columns]
             list_data.append(data)
 
+        if len(list_data) == 0:
+            raise ValueError("No data to export.")
+
         data_concat = pd.concat(list_data, axis=1)
         if wide_format:
             data_concat = data_concat.reset_index("date").unstack("day_id")
             data_concat = pd.DataFrame(data_concat, columns=[self.subject_id]).T
+
+            # rearrange columns so that "date_*" is first, followed by "awakening_*", then "sampling_*"
+            col_names = list(data_concat.columns.get_level_values(level=0).unique())
+            day_names = list(data_concat.columns.get_level_values(level="day_id").unique())
+            col_names = list(
+                product(
+                    day_names,
+                    col_names,
+                )
+            )
+            # invert order of tuples
+            col_names = [(col[1], col[0]) for col in col_names]
+            data_concat = data_concat.reindex(columns=col_names)
             data_concat.columns = [f"{col[0]}_D{col[1]}" for col in data_concat.columns]
             data_concat.index.name = "subject"
 

@@ -1,10 +1,10 @@
 """Internal helpers for dataset validation."""
 from pathlib import Path
-from typing import Optional, Sequence, Tuple, Union, Iterable, List
+from typing import Iterable, List, Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
-from carwatch.utils._types import path_t, _Hashable
+from carwatch.utils._types import _Hashable, path_t
 from carwatch.utils.exceptions import FileExtensionError, ValidationError
 
 
@@ -149,9 +149,9 @@ def _assert_has_columns(
 
     if result is False:
         if len(columns_sets) == 1:
-            helper_str = "the following columns: {}".format(columns_sets[0])
+            helper_str = f"the following columns: {columns_sets[0]}"
         else:
-            helper_str = "one of the following sets of columns: {}".format(columns_sets)
+            helper_str = f"one of the following sets of columns: {columns_sets}"
         if raise_exception:
             raise ValidationError(
                 "The dataframe is expected to have {}. Instead it has the following columns: {}".format(
@@ -217,10 +217,7 @@ def _multiindex_level_names_helper(
         level_names = [level_names]
 
     ex_levels = list(level_names)
-    if idx_or_col == "index":
-        ac_levels = list(df.index.names)
-    else:
-        ac_levels = list(df.columns.names)
+    ac_levels = list(df.index.names) if idx_or_col == "index" else list(df.columns.names)
 
     expected = _multiindex_level_names_helper_get_expected_levels(ac_levels, ex_levels, match_atleast, match_order)
 
@@ -249,10 +246,7 @@ def _multiindex_check_helper(
         return _multiindex_check_helper_not_expected(idx_or_col, nlevels, nlevels_act, expected, raise_exception)
 
     if has_multiindex is True:
-        if nlevels_atleast:
-            expected = nlevels_act >= nlevels
-        else:
-            expected = nlevels_act == nlevels
+        expected = nlevels_act >= nlevels if nlevels_atleast else nlevels_act == nlevels
         if not expected:
             if raise_exception:
                 raise ValidationError(
@@ -304,10 +298,9 @@ def _multiindex_level_names_helper_get_expected_levels(
             expected = ex_levels == ac_levels_slice
         else:
             expected = ex_levels == ac_levels
+    elif match_atleast:
+        expected = all(level in ac_levels for level in ex_levels)
     else:
-        if match_atleast:
-            expected = all(level in ac_levels for level in ex_levels)
-        else:
-            expected = sorted(ex_levels) == sorted(ac_levels)
+        expected = sorted(ex_levels) == sorted(ac_levels)
 
     return expected
