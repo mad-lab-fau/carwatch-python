@@ -10,7 +10,7 @@ import pandas as pd
 
 from carwatch.utils._datatype_validation_helper import _assert_file_extension, _assert_is_dtype
 from carwatch.utils._types import path_t, str_t
-from carwatch.utils.exceptions import LogDataInvalidError
+from carwatch.utils.exceptions import LogDataParseError
 
 
 class ParticipantLogs:
@@ -228,6 +228,18 @@ class ParticipantLogs:
     ) -> pd.DataFrame:
         df = pd.read_csv(file_path, sep=";", header=None, names=["time", "action", "extras"])
 
+        # assert that time is monotonic increasing
+        if not df["time"].is_monotonic_increasing and error_handling in ["warn", "raise"]:
+            msg = (
+                "The timestamps in the log data are not monotonic increasing. "
+                "It might be corrupted or manually tampered with. If you want to load the log data anyway, "
+                "set `error_handling = 'ignore'`."
+            )
+            if error_handling == "warn":
+                warnings.warn(msg)
+            else:
+                raise LogDataParseError(msg)
+
         df["time"] = pd.to_datetime(df["time"], unit="ms")
         df = df.set_index("time")
         df.index = df.index.tz_localize("UTC").tz_convert(tz)
@@ -279,7 +291,7 @@ class ParticipantLogs:
             if self.error_handling == "warn":
                 warnings.warn("Action 'Subject ID Set' not found - Log Data may be invalid!")
             elif self.error_handling == "raise":
-                raise LogDataInvalidError("Action 'Subject ID Set' not found - Log Data may be invalid!") from e
+                raise LogDataParseError("Action 'Subject ID Set' not found - Log Data may be invalid!") from e
         # App Metadata
         self.app_metadata = self.get_extras_for_log_action("app_metadata")
         # Phone Metadata

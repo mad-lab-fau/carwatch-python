@@ -1,6 +1,6 @@
 """A set of custom exceptions."""
 
-__all__ = ["FileExtensionError", "LogDataInvalidError", "ValidationError"]
+__all__ = ["FileExtensionError", "LogDataParseError", "ValidationError"]
 
 
 class ValidationError(Exception):
@@ -11,5 +11,5 @@ class FileExtensionError(Exception):
     """An error indicating that the file name has the wrong file extension."""
 
 
-class LogDataInvalidError(Exception):
-    """An error indicating that the log data is invalid."""
+class LogDataParseError(Exception):
+    """An error indicating issues while parsing log data."""
