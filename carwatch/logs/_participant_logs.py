@@ -63,6 +63,12 @@ class ParticipantLogs:
         data : :class:`~pandas.DataFrame`
             log data as dataframe
         tz : str
+            timezone of the log data
+        error_handling : {"ignore", "warn", "raise"}, optional
+            how to handle error when parsing log data. ``error_handling`` can be one of the following:
+            ``"ignore"``: ignore errors and continue parsing
+            ``"warn"``: ignore errors and continue parsing, but print a warning
+            ``"raise"``: raise an exception when an error occurs
 
         """
         self._data: pd.DataFrame = data
@@ -81,7 +87,7 @@ class ParticipantLogs:
         extract_folder: Optional[bool] = False,
         overwrite_unzipped_logs: Optional[bool] = False,
         tz: Optional[str] = "Europe/Berlin",
-        error_handling: Optional[Literal["ignore", "warn", "raise"]] = "ignore",
+        error_handling: Optional[Literal["ignore", "warn", "raise"]] = "raise",
     ) -> "ParticipantLogs":
         """Load log files from one subject.
 
@@ -115,6 +121,9 @@ class ParticipantLogs:
         path = Path(path)
 
         _assert_file_extension(path, ".zip")
+        if not path.exists():
+            raise FileNotFoundError(f"File {path} does not exist.")
+
         with zipfile.ZipFile(path, "r") as zip_ref:
             if extract_folder:
                 # extract zip file to folder with same name as zip file
@@ -139,7 +148,7 @@ class ParticipantLogs:
         cls,
         folder_path: path_t,
         tz: Optional[str] = "Europe/Berlin",
-        error_handling: Optional[Literal["ignore", "warn", "raise"]] = "ignore",
+        error_handling: Optional[Literal["ignore", "warn", "raise"]] = "raise",
     ) -> "ParticipantLogs":
         """Load log files from one participant.
 
@@ -166,11 +175,13 @@ class ParticipantLogs:
 
         """
         folder_path = Path(folder_path)
-        log_data = cls._folder_to_dataframe(folder_path, tz)
+        log_data = cls._folder_to_dataframe(folder_path, tz, error_handling=error_handling)
         return cls(log_data, tz, error_handling=error_handling)
 
     @classmethod
-    def _folder_to_dataframe(cls, folder_path: Path, tz: str) -> pd.DataFrame:
+    def _folder_to_dataframe(
+        cls, folder_path: Path, tz: str, error_handling: Optional[Literal["ignore", "warn", "raise"]] = "raise"
+    ) -> pd.DataFrame:
         """Load log data from folder of one participant and return it as dataframe.
 
         Parameters
@@ -179,6 +190,9 @@ class ParticipantLogs:
             path to folder containing log files from participant
         tz : str
             timezone of the log data
+        error_handling : {"ignore", "warn", "raise"}, optional
+            how to handle error when parsing log data. ``error_handling`` can be one of the following:
+
 
         Returns
         -------
@@ -192,7 +206,7 @@ class ParticipantLogs:
         file_list = sorted(folder_path.glob("*.csv"))
         if len(file_list) == 0:
             raise FileNotFoundError(f"No log files found in folder {folder_path}.")
-        return pd.concat([cls._load_log_file_csv(file, tz) for file in file_list])
+        return pd.concat([cls._load_log_file_csv(file, tz, error_handling=error_handling) for file in file_list])
 
     @classmethod
     def _zip_file_to_dataframe(cls, zip_ref: zipfile.ZipFile, tz: str) -> pd.DataFrame:
@@ -225,6 +239,7 @@ class ParticipantLogs:
         cls,
         file_path: Union[Path, IO[bytes]],
         tz: str,
+        error_handling: Optional[Literal["ignore", "warn", "raise"]] = "raise",
     ) -> pd.DataFrame:
         df = pd.read_csv(file_path, sep=";", header=None, names=["time", "action", "extras"])
 
@@ -296,6 +311,17 @@ class ParticipantLogs:
         self.app_metadata = self.get_extras_for_log_action("app_metadata")
         # Phone Metadata
         self.phone_metadata = self.get_extras_for_log_action("phone_metadata")
+        # Study Metadata
+        # TODO hardcoded for now, change after study metadata is implemented
+        self.study_metadata = {
+            "study_name": "Test",
+            "study_type": "CAR",
+            "num_days": 2,
+            "saliva_ids": {0: "S1", 1: "S2", 2: "S3", 3: "S4", 4: "S5", 5: "SA"},
+            "time_points": [0, 15, 30, 45, 60],
+            "has_evening_sample": True,
+        }
+        #  self.study_metadata = self.get_extras_for_log_action("study_metadata")
 
         # Log Info
         self.log_dates = np.array(list(self._data.index.normalize().unique()))
@@ -384,9 +410,7 @@ class ParticipantLogs:
 
 
         """
-        if self.log_dates is not None and len(self.log_dates) > 0:
-            return self.log_dates[0]
-        return pd.Timestamp()
+        return self.log_dates[0]
 
     @property
     def end_date(self) -> pd.Timestamp:
@@ -400,9 +424,7 @@ class ParticipantLogs:
             start date
 
         """
-        if self.log_dates is not None and len(self.log_dates) > 0:
-            return self.log_dates[-1]
-        return pd.Timestamp()
+        return self.log_dates[-1]
 
     @property
     def num_saliva_samples(self) -> int:
@@ -414,21 +436,55 @@ class ParticipantLogs:
             number of saliva samples
 
         """
-        # TODO change when new app version is released
-        return 5
+        return len(self.study_metadata.get("time_points"))
 
     @property
-    def sampling_time_differences(self) -> Sequence[int]:
-        """Return times between saliva samples.
+    def saliva_ids(self) -> Dict[int, str]:
+        """Return saliva ids.
+
+        Returns
+        -------
+        dict of int, str
+            mapping of saliva indices to saliva ids
+
+        """
+        return self.study_metadata.get("saliva_ids")
+
+    @property
+    def time_points(self) -> Sequence[int]:
+        """Return saliva sample time points.
 
         Returns
         -------
         list of int
-            times between saliva samples in minutes
+            saliva sample time points in minutes
 
         """
-        # TODO change when new app version is released
-        return [15] * (self.num_saliva_samples - 1)
+        return self.study_metadata.get("time_points")
+
+    @property
+    def study_type(self) -> str:
+        """Return study type.
+
+        Returns
+        -------
+        str
+            study type
+
+        """
+        return self.study_metadata.get("study_type")
+
+    @property
+    def has_evening_sample(self) -> bool:
+        """Return whether the study has an evening saliva sample.
+
+        Returns
+        -------
+        bool
+            whether the study has an evening saliva sample
+
+        """
+        return self.study_metadata.get("has_evening_sample")
 
     def data_as_df(self) -> pd.DataFrame:
         """Return log data as dataframe.
@@ -491,7 +547,7 @@ class ParticipantLogs:
         return data.loc[data.index.normalize() == date]
 
     def split_sampling_days(
-        self, split_night: Optional[bool] = True, return_dict: Optional[bool] = False
+        self, split_into_nights: Optional[bool] = True, return_dict: Optional[bool] = False
     ) -> Dict[str, pd.DataFrame]:
         """Split continuous log data into individual sampling days.
 
@@ -501,7 +557,7 @@ class ParticipantLogs:
 
         Parameters
         ----------
-        split_night : bool, optional
+        split_into_nights : bool, optional
             If ``True``, split data into *nights*, assuming that samples taken in the evening correspond to the
             next day. This means that data are split at 6pm. This is the typical way if cortisol awakening response
             (CAR) data with preceding evening saliva samples are assessed.
@@ -526,7 +582,7 @@ class ParticipantLogs:
         date_diff = np.append(date_diff[0], date_diff)
         idx_date = np.where(date_diff)[0]
 
-        dict_data = self._split_night(data, idx_date) if split_night else self._split_day(data, idx_date)
+        dict_data = self._split_night(data, idx_date) if split_into_nights else self._split_day(data, idx_date)
 
         if return_dict:
             return dict_data
@@ -655,20 +711,14 @@ class ParticipantLogs:
 
         return json.loads(row["extras"].iloc[0])
 
-    def sampling_times(
-        self,
-        include_evening_sample: Optional[bool] = True,
-        add_day_id: Optional[bool] = True,
-    ) -> pd.DataFrame:
-        """Get sampling times.
+    def sampling_times(self, include_evening_sample: Optional[bool] = True) -> pd.DataFrame:
+        """Extract saliva sampling times from log data.
 
         Parameters
         ----------
         include_evening_sample : bool, optional
             ``True`` to include evening sampling times, ``False`` to only include morning sampling times.
             Default: ``True``
-        add_day_id : bool, optional
-            ``True`` to add an index level with an increasing day id. Default: ``True``
 
         Returns
         -------
@@ -686,17 +736,19 @@ class ParticipantLogs:
             # convert extras to dataframe
             df = pd.DataFrame(list(extras.values))
             df = df[["saliva_id"]]
-            # add new columns
-            df = df.assign(
-                timestamp=data_filt.index, sampling_time=data_filt.index.strftime("%H:%M:%S"), saliva_type="morning"
-            )
 
-            # assign morning or evening "saliva_type" to each saliva_id
-            df.loc[df["saliva_id"] >= self.num_saliva_samples, "saliva_type"] = "evening"
+            if self.study_type == "CAR" and self.has_evening_sample:
+                # assign morning or evening "saliva_type" to each saliva_id
+                df = df.assign(
+                    timestamp=data_filt.index, sampling_time=data_filt.index.strftime("%H:%M:%S"), saliva_type="morning"
+                )
+                # the last saliva_id is the evening sample
+                df.loc[df["saliva_id"] == list(self.saliva_ids.keys())[-1], "saliva_type"] = "evening"
+
             # find the last barcode_scanned event for each saliva_id
             df = df.groupby("saliva_id", sort=False).last()
             df = df.reset_index().set_index(["saliva_type", "saliva_id"])
-            # TODO: replace saliva IDs with prefix when supported by app
+            df = df.rename(self.saliva_ids, level="saliva_id")
             data_split[day] = df
 
         data_concat = pd.concat(data_split, names=["date"])
@@ -704,20 +756,14 @@ class ParticipantLogs:
         if not include_evening_sample:
             data_concat = data_concat.drop("evening", level="saliva_type")
 
-        if add_day_id:
-            # assign a unique id to each night, starting with 1
-            date_vals = data_concat.index.get_level_values("date")
-            data_concat = data_concat.assign(day_id=date_vals.unique().searchsorted(date_vals) + 1)
-            data_concat = data_concat.set_index("day_id", append=True)
+        # assign a unique id to each night, starting with 1
+        date_vals = data_concat.index.get_level_values("date")
+        data_concat = data_concat.assign(day_id=date_vals.unique().searchsorted(date_vals) + 1)
+        data_concat = data_concat.set_index("day_id", append=True)
         return data_concat
 
-    def awakening_times(self, add_day_id: Optional[bool] = True) -> pd.DataFrame:
+    def awakening_times(self) -> pd.DataFrame:
         """Extract awakening times from log data.
-
-        Parameters
-        ----------
-        add_day_id : bool, optional
-            ``True`` to add an index level with an increasing day id. Default: ``True``
 
         Returns
         -------
@@ -755,38 +801,41 @@ class ParticipantLogs:
 
             # todo test
             if data_day.iloc[0]["awakening_type"] == "alarm" and data_day["saliva_id"].iloc[0] not in [np.nan, 0]:
-                data_day["awakening_time"] = np.nan
+                data_day = data_day.reset_index()
+                data_day.iloc[0, :] = np.nan
+                data_day = data_day.set_index("timestamp")
+
             data_day = data_day[["awakening_time", "awakening_type"]]
             data_split[day] = data_day
 
         data_concat = pd.concat(data_split, names=["date"])
         data_concat = data_concat.reset_index("timestamp")
 
-        if add_day_id:
-            data_concat = data_concat.assign(day_id=range(1, len(data_concat) + 1))
-            data_concat = data_concat.set_index("day_id", append=True)
+        data_concat = data_concat.assign(day_id=range(1, len(data_concat) + 1))
+        data_concat = data_concat.set_index("day_id", append=True)
         return data_concat
 
     def export_times(
         self,
-        include_sampling_times: Optional[bool] = True,
+        sampling_times: Optional[bool] = True,
+        awakening_times: Optional[bool] = True,
         include_evening_sample: Optional[bool] = True,
-        include_awakening_times: Optional[bool] = True,
-        add_day_id: Optional[bool] = True,
+        wide_format: Optional[bool] = False,
     ) -> pd.DataFrame:
         """Export sampling and/or awakening times from the participant's logs.
 
         Parameters
         ----------
-        include_sampling_times : bool, optional
+        sampling_times : bool, optional
             ``True`` to include sampling times, ``False`` to exclude. Default: ``True``
+        awakening_times : bool, optional
+            ``True`` to include awakening times, ``False`` to exclude. Default: ``True``
         include_evening_sample : bool, optional
             ``True`` to include evening sampling times, ``False`` to only include morning sampling times.
             Default: ``True``
-        include_awakening_times : bool, optional
-            ``True`` to include awakening times, ``False`` to exclude. Default: ``True``
-        add_day_id : bool, optional
-            ``True`` to add an index level with the day id. Default: ``False``
+        wide_format : bool, optional
+            ``True`` to return a wide format dataframe where one row represents one participant, ``False`` to return a
+            dataframe where one row represents one day/night. Default: ``False``
 
         Returns
         -------
@@ -795,16 +844,23 @@ class ParticipantLogs:
 
         """
         list_data = []
-        if include_awakening_times:
-            data = self.awakening_times(add_day_id=add_day_id)
+        if awakening_times:
+            data = self.awakening_times()
             data = data[["awakening_time", "awakening_type"]]
             list_data.append(data)
-        if include_sampling_times:
-            data = self.sampling_times(include_evening_sample=include_evening_sample, add_day_id=add_day_id)
+        if sampling_times:
+            data = self.sampling_times(include_evening_sample=include_evening_sample)
             data = data[["sampling_time"]]
             data = data.droplevel("saliva_type")
             data = data.unstack(["saliva_id"])
             data.columns = ["_".join(map(str, col)) for col in data.columns]
             list_data.append(data)
 
-        return pd.concat(list_data, axis=1)
+        data_concat = pd.concat(list_data, axis=1)
+        if wide_format:
+            data_concat = data_concat.reset_index("date").unstack("day_id")
+            data_concat = pd.DataFrame(data_concat, columns=[self.subject_id]).T
+            data_concat.columns = [f"{col[0]}_D{col[1]}" for col in data_concat.columns]
+            data_concat.index.name = "subject"
+
+        return data_concat

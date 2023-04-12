@@ -50,7 +50,7 @@ class StudyLogs:
 
     @classmethod
     def from_folder(
-        cls, folder_path: path_t, error_handling: Optional[Literal["ignore", "warn", "raise"]] = "ignore"
+        cls, folder_path: path_t, error_handling: Optional[Literal["ignore", "warn", "raise"]] = "raise"
     ) -> StudyLogs:
         """Create a :class:`~carwatch.logs.StudyLogs` object from a folder containing log files.
 
@@ -107,7 +107,7 @@ class StudyLogs:
         include_sampling_times: Optional[bool] = True,
         include_evening_sample: Optional[bool] = True,
         include_awakening_times: Optional[bool] = True,
-        add_day_id: Optional[bool] = True,
+        wide_format: Optional[bool] = True,
     ) -> pd.DataFrame:
         """Export the sampling and/or awakening times of all log files from the study as a :class:`~pandas.DataFrame`.
 
@@ -120,8 +120,9 @@ class StudyLogs:
             Default: ``True``
         include_awakening_times : bool, optional
             ``True`` to include awakening times, ``False`` to exclude. Default: ``True``
-        add_day_id : bool, optional
-            ``True`` to add an index level with the night id. Default: ``False``
+        wide_format : bool, optional
+            ``True`` to return a wide format dataframe where one row represents one participant, ``False`` to return a
+            dataframe where one row represents one day/night. Default: ``False``
 
         Returns
         -------
@@ -129,18 +130,19 @@ class StudyLogs:
             sampling and/or awakening times of all log files from the study as a :class:`~pandas.DataFrame`
 
         """
-        return pd.concat(
-            {
-                key: participant_logs.export_times(
-                    include_sampling_times=include_sampling_times,
-                    include_evening_sample=include_evening_sample,
-                    include_awakening_times=include_awakening_times,
-                    add_day_id=add_day_id,
-                )
-                for key, participant_logs in self._study_logs.items()
-            },
-            names=["subject"],
-        )
+        data_dict = {
+            key: participant_logs.export_times(
+                sampling_times=include_sampling_times,
+                include_evening_sample=include_evening_sample,
+                awakening_times=include_awakening_times,
+                wide_format=wide_format,
+            )
+            for key, participant_logs in self._study_logs.items()
+        }
+        if wide_format:
+            return pd.concat(data_dict.values())
+
+        return pd.concat(data_dict, names=["subject"])
 
     @property
     def android_versions(self):
