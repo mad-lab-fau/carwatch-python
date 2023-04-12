@@ -548,7 +548,7 @@ class ParticipantLogs:
 
     def split_sampling_days(
         self, split_into_nights: Optional[bool] = True, return_dict: Optional[bool] = False
-    ) -> Dict[str, pd.DataFrame]:
+    ) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
         """Split continuous log data into individual sampling days.
 
         This function splits data into individual sampling days.
