@@ -2,10 +2,6 @@
 
 __version__ = "0.1.1"
 
-from carwatch import (
-    examples,  # noqa: F401
-    labels,
-    logs,
-)
+from carwatch import example_data, labels, logs
 
-__all__ = ["labels", "logs"]
+__all__ = ["labels", "logs", "example_data"]
