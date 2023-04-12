@@ -34,7 +34,7 @@ plotting = ["matplotlib", "seaborn", "ipywidgets", "ipympl", "fau_colors"]
 black = "^22.6.0"
 poethepoet = "^0.16.0"
 pytest = "^7.1.2"
-pytest-cov = "^3.0.0"
+pytest-cov = "^4.0.0"
 ruff = "^0.0.261"
 ipykernel = "^6.15.1"
 

@@ -137,7 +137,7 @@ class TestParticipantLogs:
         with pytest.warns(UserWarning):
             ParticipantLogs.from_zip_file(file_name, extract_folder=True, error_handling="warn")
 
-        self.teardown()
+        self.teardown_method()
 
     @pytest.mark.parametrize(
         "file_name, extract_folder",
@@ -155,7 +155,7 @@ class TestParticipantLogs:
             f"Folder should{'' if extract_folder else ' not'} be extracted but it "
             f"does{' not' if extract_folder else ''} exist"
         )
-        self.teardown()
+        self.teardown_method()
 
     @pytest.mark.parametrize(
         "folder_path, expected",
@@ -292,10 +292,10 @@ class TestParticipantLogs:
     @pytest.fixture(autouse=True)
     def after_test(self):
         yield
-        self.teardown()
+        self.teardown_method()
 
     @staticmethod
-    def teardown():
+    def teardown_method():
         folder = TEST_DATA_PATH.joinpath("correct/zip_files/logs_AB12C")
         if folder.exists():
             shutil.rmtree(folder)
