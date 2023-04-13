@@ -75,3 +75,7 @@ test = { cmd = "pytest --cov=carwatch -cov-report=term-missing --cov-report=xml"
 update_version = { script = "_tasks:task_update_version()" }
 register_ipykernel = { cmd = "python -m ipykernel install --user --name carwatch --display-name carwatch", help = "Add a new jupyter kernel for the project." }
 remove_ipykernel = { cmd = "jupyter kernelspec uninstall carwatch", help = "Remove the project specific jupyter kernel."}
+
+
+[tool.poetry.scripts]
+prepare_study = 'carwatch.scripts.prepare_study:run'
