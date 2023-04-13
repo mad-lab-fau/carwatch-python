@@ -144,7 +144,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     prompt="Add barcode to label?",
     is_flag=True,
     help="Whether a barcode encoding the participant id, day of study, and number of biomarker sample will be"
-         " printed on every individual label.",
+    " printed on every individual label.",
     cls=Condition,
     pos_condition="generate_barcode",
 )
@@ -255,7 +255,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     default="15",
     required=False,
     prompt="Please specify duration between all saliva samples in minutes"
-           " (as number when constant, as comma-separated list when varying from sample to sample)",
+    " (as number when constant, as comma-separated list when varying from sample to sample)",
     type=str,
     help="The duration between saliva samples in minutes.",
     callback=validate_saliva_distances,
@@ -299,15 +299,15 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
 )
 def run(
-        study_name: Optional[str] = None,
-        num_days: Optional[int] = None,
-        num_samples: Optional[int] = None,
-        subject_path: Optional[str] = None,
-        subject_column: Optional[str] = None,
-        num_subjects: Optional[int] = None,
-        subject_prefix: Optional[str] = None,
-        has_evening_sample: Optional[bool] = None,
-        **kwargs,
+    study_name: Optional[str] = None,
+    num_days: Optional[int] = None,
+    num_samples: Optional[int] = None,
+    subject_path: Optional[str] = None,
+    subject_column: Optional[str] = None,
+    num_subjects: Optional[int] = None,
+    subject_prefix: Optional[str] = None,
+    has_evening_sample: Optional[bool] = None,
+    **kwargs,
 ):
     """Generate barcode labels and QR codes for CAR study.
 
@@ -396,14 +396,10 @@ def run(
     )
 
     if kwargs["generate_barcode"]:
-        _generate_barcode(
-            study, **kwargs
-        )
+        _generate_barcode(study, **kwargs)
     if kwargs["generate_qr"]:
         try:
-            _generate_qr_code(
-                study, **kwargs
-            )
+            _generate_qr_code(study, **kwargs)
         except ValueError as e:
             done = True
             raise click.BadParameter(str(e)) from e
@@ -411,11 +407,13 @@ def run(
     done = True
 
 
-def _generate_barcode(
-        study: Study, **kwargs
-):
-    generator = LabelGenerator(study=study, add_name=kwargs["add_name"], has_barcode=kwargs["has_barcode"],
-                               sample_prefix=kwargs["sample_prefix"])
+def _generate_barcode(study: Study, **kwargs):
+    generator = LabelGenerator(
+        study=study,
+        add_name=kwargs["add_name"],
+        has_barcode=kwargs["has_barcode"],
+        sample_prefix=kwargs["sample_prefix"],
+    )
     if not kwargs["default_layout"]:
         layout = CustomLayout(
             num_cols=kwargs["num_cols"],
@@ -432,9 +430,7 @@ def _generate_barcode(
         generator.generate(output_dir=kwargs["output_dir"], output_name=kwargs["output_name_label"])
 
 
-def _generate_qr_code(
-        study, **kwargs
-):
+def _generate_qr_code(study, **kwargs):
     saliva_distances = _parse_saliva_distances(kwargs["saliva_distances"])
     generator = QrCodeGenerator(
         study=study,
