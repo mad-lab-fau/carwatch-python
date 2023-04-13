@@ -144,7 +144,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     prompt="Add barcode to label?",
     is_flag=True,
     help="Whether a barcode encoding the participant id, day of study, and number of biomarker sample will be"
-    " printed on every individual label.",
+         " printed on every individual label.",
     cls=Condition,
     pos_condition="generate_barcode",
 )
@@ -241,14 +241,6 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     help="Whether a qr code encoding the study data for configuring the CAR watch app should be generated.",
 )
 @click.option(
-    "--output_dir",
-    default=".",
-    prompt="Output directory for generated files",
-    help="Directory where generated files will be stored.",
-    envvar="PATHS",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-)
-@click.option(
     "--output_name_qr",
     default=lambda: get_file_name(DEFAULT_QR_FILE_SUFFIX),
     prompt="Name of QR code file",
@@ -263,7 +255,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     default="15",
     required=False,
     prompt="Please specify duration between all saliva samples in minutes"
-    " (as number when constant, as comma-separated list when varying from sample to sample)",
+           " (as number when constant, as comma-separated list when varying from sample to sample)",
     type=str,
     help="The duration between saliva samples in minutes.",
     callback=validate_saliva_distances,
@@ -298,31 +290,39 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     pos_condition="generate_qr",
     help="Whether the CARWatch app will allow manual scanning of sample barcodes apart from timed alarms.",
 )
+@click.option(
+    "--output_dir",
+    default=".",
+    prompt="Output directory for generated files",
+    help="Directory where generated files will be stored.",
+    envvar="PATHS",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+)
 def run(
-    sample_prefix: Optional[str] = None,
-    study_name: Optional[str] = None,
-    num_days: Optional[int] = None,
-    num_samples: Optional[int] = None,
-    sample_start_id: Optional[int] = None,
-    subject_path: Optional[str] = None,
-    subject_column: Optional[str] = None,
-    num_subjects: Optional[int] = None,
-    has_subject_prefix: Optional[bool] = None,  # pylint: disable=unused-argument
-    subject_prefix: Optional[str] = None,
-    has_evening_sample: Optional[bool] = None,
-    add_name: Optional[bool] = None,
-    has_barcode: Optional[bool] = None,
-    output_dir: Optional[str] = None,
-    generate_barcode: Optional[bool] = None,
-    generate_qr: Optional[bool] = None,
-    output_name_label: Optional[str] = None,
-    output_name_qr: Optional[str] = None,
-    default_layout: Optional[bool] = None,
-    saliva_distances: Optional[str] = None,
-    contact_email: Optional[str] = None,
-    check_duplicates: Optional[bool] = None,
-    enable_manual_scan: Optional[bool] = None,
-    **kwargs,
+        sample_prefix: Optional[str] = None,
+        study_name: Optional[str] = None,
+        num_days: Optional[int] = None,
+        num_samples: Optional[int] = None,
+        sample_start_id: Optional[int] = None,
+        subject_path: Optional[str] = None,
+        subject_column: Optional[str] = None,
+        num_subjects: Optional[int] = None,
+        has_subject_prefix: Optional[bool] = None,  # pylint: disable=unused-argument
+        subject_prefix: Optional[str] = None,
+        has_evening_sample: Optional[bool] = None,
+        add_name: Optional[bool] = None,
+        has_barcode: Optional[bool] = None,
+        generate_barcode: Optional[bool] = None,
+        generate_qr: Optional[bool] = None,
+        output_name_label: Optional[str] = None,
+        output_name_qr: Optional[str] = None,
+        default_layout: Optional[bool] = None,
+        saliva_distances: Optional[str] = None,
+        contact_email: Optional[str] = None,
+        check_duplicates: Optional[bool] = None,
+        enable_manual_scan: Optional[bool] = None,
+        output_dir: Optional[str] = None,
+        **kwargs,
 ):
     """Generate barcode labels and QR codes for CAR study.
 
@@ -427,7 +427,7 @@ def run(
 
 
 def _generate_barcode(
-    study, add_name, has_barcode, sample_prefix, default_layout, output_dir, output_name_label, **kwargs
+        study, add_name, has_barcode, sample_prefix, default_layout, output_dir, output_name_label, **kwargs
 ):
     generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode, sample_prefix=sample_prefix)
     if not default_layout:
@@ -447,7 +447,7 @@ def _generate_barcode(
 
 
 def _generate_qr_code(
-    study, saliva_distances, contact_email, check_duplicates, enable_manual_scan, output_dir, output_name_qr
+        study, saliva_distances, contact_email, check_duplicates, enable_manual_scan, output_dir, output_name_qr
 ):
     saliva_distances = _parse_saliva_distances(saliva_distances)
     generator = QrCodeGenerator(
