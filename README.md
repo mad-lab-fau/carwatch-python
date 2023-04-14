@@ -185,11 +185,12 @@ To be added
 ### Command Line Interface
 
 For the preparation steps, `carwatch` also provides a CLI for more convenient usage.
-To use it, open a terminal session in the `carwatch` directory, and run the preparation CLI by typing:
-
+Make sure you installed the `carwatch` package with `pip install carwatch`. After that, you can simply run the preparation CLI by running
 ```
 prepare_study
 ```
+in a terminal session.
+
 This will implicitly run the `scripts/prepare_study.py` script, which will guide you through the preparation steps.
 You will then be prompted to enter all the required information step-by-step. The desired output files will 
 be automatically generated for you.
