@@ -1,0 +1,1 @@
+# file that should be ignored by carwatch Log functions

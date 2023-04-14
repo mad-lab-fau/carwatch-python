@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple, Sequence
 
 import pandas as pd
 
 from carwatch.logs import ParticipantLogs
+from carwatch.logs._utils import filter_folder_for_participant_logs
 from carwatch.utils._types import path_t
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot as plt
 
 
@@ -44,13 +45,18 @@ class StudyLogs:
         return len(self._study_logs)
 
     @property
-    def participants(self):
+    def participants(self) -> Sequence[str]:
         """Return the participants of the study."""
         return list(self._study_logs.keys())
 
     @classmethod
     def from_folder(
-        cls, folder_path: path_t, error_handling: Optional[Literal["ignore", "warn", "raise"]] = "raise"
+        cls,
+        folder_path: path_t,
+        extract_folder: Optional[bool] = False,
+        overwrite_unzipped_logs: Optional[bool] = False,
+        tz: Optional[str] = "Europe/Berlin",
+        error_handling: Optional[Literal["ignore", "warn", "raise"]] = "raise",
     ) -> StudyLogs:
         """Create a :class:`~carwatch.logs.StudyLogs` object from a folder containing log files.
 
@@ -58,6 +64,12 @@ class StudyLogs:
         ----------
         folder_path : path or str
             path to the folder containing the log files
+        extract_folder : bool, optional
+            ``True`` to extract the zip files to a folder, ``False`` to keep the zip files. Default: ``False``
+        overwrite_unzipped_logs : bool, optional
+            ``True`` to overwrite existing unzipped log files, ``False`` to keep the existing files. Default: ``False``
+        tz : str, optional
+            timezone of the log files. Default: "Europe/Berlin"
         error_handling : {"ignore", "warn", "raise"}, optional
             how to handle error when parse log data. ``error_handling`` can be one of the following:
 
@@ -75,17 +87,24 @@ class StudyLogs:
         """
         folder_path = Path(folder_path)
         study_logs = {}
-        for path in sorted(folder_path.glob("*")):
-            if path.is_dir():
-                logs = ParticipantLogs.from_folder(path, error_handling=error_handling)
-            elif path.is_file() and path.suffix == ".zip":
-                logs = ParticipantLogs.from_zip_file(path, error_handling=error_handling)
-            else:
-                continue
+        file_list = filter_folder_for_participant_logs(folder_path)
+
+        if len(file_list) == 0:
+            raise FileNotFoundError(f"No log files found in folder {folder_path}.")
+
+        for path in file_list:
+            if path.is_file() and path.suffix == ".zip":
+                logs = ParticipantLogs.from_zip_file(
+                    path,
+                    extract_folder=extract_folder,
+                    overwrite_unzipped_logs=overwrite_unzipped_logs,
+                    tz=tz,
+                    error_handling=error_handling,
+                )
+            else:  # must be a folder
+                logs = ParticipantLogs.from_folder(path, tz=tz, error_handling=error_handling)
             study_logs[logs.subject_id] = logs
 
-        if len(study_logs) == 0:
-            raise ValueError(f"No log files found in folder {folder_path}.")
         return cls(study_logs)
 
     def data_as_df(self):
@@ -145,7 +164,7 @@ class StudyLogs:
         return pd.concat(data_dict, names=["subject"])
 
     @property
-    def android_versions(self):
+    def android_versions(self) -> pd.DataFrame:
         """Return the Android versions of the different study participants as a :class:`~pandas.DataFrame`.
 
         Returns
@@ -188,7 +207,7 @@ class StudyLogs:
         """
         return self._get_metadata("phone_manufacturer")
 
-    def _get_metadata(self, metadata_type: str):
+    def _get_metadata(self, metadata_type: str) -> pd.DataFrame:
         data = {key: getattr(logs, metadata_type) for key, logs in self._study_logs.items()}
         data = pd.Series(data).to_frame(name=metadata_type)
         data.index.name = "subject"
@@ -210,7 +229,7 @@ class StudyLogs:
         """
         return pd.DataFrame(self._get_metadata(metadata).value_counts(), columns=["count"])
 
-    def get_metadata_plot(self, metadata: str, **kwargs) -> Tuple[plt.Figure, plt.Axes]:
+    def get_metadata_plot(self, metadata: str, **kwargs) -> Tuple[plt.Figure, plt.Axes]:  # pragma: no cover
         try:
             import matplotlib.pyplot as plt
             import seaborn as sns

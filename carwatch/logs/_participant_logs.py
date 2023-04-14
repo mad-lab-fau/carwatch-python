@@ -9,6 +9,7 @@ from typing import IO, Any, Dict, Literal, Optional, Sequence, Union
 import numpy as np
 import pandas as pd
 
+from carwatch.logs._utils import filter_zip_file_for_logs
 from carwatch.utils._datatype_validation_helper import _assert_file_extension, _assert_is_dtype
 from carwatch.utils._types import path_t, str_t
 from carwatch.utils.exceptions import LogDataParseError
@@ -226,13 +227,7 @@ class ParticipantLogs:
             dataframe with log data for one participant
 
         """
-        file_list = [
-            f
-            for f in zip_ref.filelist
-            if f.filename.endswith(".csv")
-            and not f.filename.startswith(".")  # ignore hidden files
-            and not f.filename.startswith("__")  # ignore hidden files
-        ]
+        file_list = filter_zip_file_for_logs(zip_ref)
         return pd.concat([cls._load_log_file_csv(zip_ref.open(file), tz) for file in file_list])
 
     @classmethod

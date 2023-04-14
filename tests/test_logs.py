@@ -11,18 +11,26 @@ import pandas as pd
 import pytest
 
 import carwatch.example_data
-from carwatch.logs import ParticipantLogs
+from carwatch.logs import ParticipantLogs, StudyLogs
 from carwatch.utils._datatype_validation_helper import _assert_has_columns, _assert_has_index_levels, _assert_is_dtype
 from carwatch.utils.exceptions import FileExtensionError, LogDataParseError
 
 TEST_DATA_PATH = Path(__file__).parent.joinpath("test_data")
 
-from pandas._testing import assert_frame_equal
+from pandas._testing import assert_frame_equal, assert_series_equal
 
 
 @contextmanager
 def does_not_raise():
     yield
+
+
+def get_correct_folder_path_zip() -> Path:
+    return TEST_DATA_PATH.joinpath(f"correct/zip_files")
+
+
+def get_correct_folder_path_folders() -> Path:
+    return TEST_DATA_PATH.joinpath(f"correct/folders")
 
 
 def get_correct_zip_file_path(participant_id: str) -> Path:
@@ -31,6 +39,10 @@ def get_correct_zip_file_path(participant_id: str) -> Path:
 
 def get_correct_folder_path(participant_id: str) -> Path:
     return TEST_DATA_PATH.joinpath(f"correct/folders/logs_{participant_id}")
+
+
+def get_empty_folder_path(participant_id: str) -> Path:
+    return TEST_DATA_PATH.joinpath(f"empty/logs_{participant_id}")
 
 
 def get_missing_awakening_folder_path(participant_id: str) -> Path:
@@ -242,7 +254,7 @@ class TestParticipantLogs:
         [
             (get_correct_folder_path("AB12C"), does_not_raise()),
             (get_correct_folder_path("XY89Z"), pytest.raises(FileNotFoundError)),  # does not exist
-            (get_correct_folder_path("QR78S"), pytest.raises(FileNotFoundError)),  # empty folder
+            (get_empty_folder_path("QR78S"), pytest.raises(FileNotFoundError)),  # empty folder
         ],
     )
     def test_from_folder_raises(self, folder_path, expected):
@@ -626,8 +638,6 @@ class TestParticipantLogs:
             wide_format=True,
         )
 
-        print(list(out.columns))
-        print(list(expected.columns))
         assert_frame_equal(out, expected)
 
     @pytest.fixture(autouse=True)
@@ -640,3 +650,71 @@ class TestParticipantLogs:
         folder = TEST_DATA_PATH.joinpath("correct/zip_files/logs_AB12C")
         if folder.exists():
             shutil.rmtree(folder)
+
+
+class TestStudyLogs:
+    @pytest.mark.parametrize(
+        ("folder_path", "expected"),
+        [
+            (TEST_DATA_PATH, pytest.raises(FileNotFoundError)),
+            (Path("."), pytest.raises(FileNotFoundError)),
+            (get_correct_folder_path_zip(), does_not_raise()),
+            (get_correct_folder_path_folders(), does_not_raise()),
+            (
+                get_empty_folder_path("logs_QR78S").parent,
+                pytest.raises(FileNotFoundError),
+            ),  # parent folder should contain folder for logs_QR78S, which are emtpy and thus raise an error
+            (
+                get_empty_folder_path("logs_QR78S"),
+                pytest.raises(FileNotFoundError),
+            ),  # folder is empty and thus raises an error
+        ],
+    )
+    def test_from_folder_raises(self, folder_path, expected):
+        with expected:
+            StudyLogs.from_folder(folder_path)
+
+    @pytest.mark.parametrize(
+        ("expected", "name"),
+        [
+            (pd.Series({"AB12C": 28, "DE34F": 28, "GH56I": 26}), "android_version"),
+            (pd.Series({"AB12C": "1.1.0", "DE34F": "1.1.0", "GH56I": "1.1.0"}), "app_version"),
+            (pd.Series({"AB12C": "ONEPLUS A6013", "DE34F": "ONEPLUS A6013", "GH56I": "SM-G930F"}), "phone_model"),
+            (pd.Series({"AB12C": "OnePlus", "DE34F": "OnePlus", "GH56I": "samsung"}), "phone_manufacturer"),
+        ],
+    )
+    def test_attributes(self, expected, name):
+        study_logs = StudyLogs.from_folder(get_correct_folder_path_zip())
+        participants = ["AB12C", "DE34F", "GH56I"]
+        assert isinstance(study_logs, StudyLogs)
+        assert len(study_logs) == 3
+        assert len(study_logs.participants) == 3
+        TestCase().assertListEqual(sorted(study_logs.participants), participants)
+        for key in study_logs:
+            assert key in participants
+            assert isinstance(study_logs[key], ParticipantLogs)
+
+        expected = expected.to_frame(name)
+        expected.index.name = "subject"
+        assert_frame_equal(getattr(study_logs, f"{name}s"), expected)
+
+    def test_data_as_df(self):
+        study_logs = StudyLogs.from_folder(get_correct_folder_path_zip())
+        out = study_logs.data_as_df()
+        for key in study_logs:
+            logs = get_correct_zip_file_path(key)
+            expected = ParticipantLogs.from_zip_file(logs).data_as_df()
+
+            assert_frame_equal(out.xs(key, level="subject"), expected)
+
+    @pytest.fixture(autouse=True)
+    def after_test(self):
+        yield
+        self.teardown_method()
+
+    @staticmethod
+    def teardown_method():
+        for subject in ["AB12C", "DE34F", "GH56J"]:
+            folder = TEST_DATA_PATH.joinpath(f"correct/zip_files/logs_{subject}")
+            if folder.exists():
+                shutil.rmtree(folder)
