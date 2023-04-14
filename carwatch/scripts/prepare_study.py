@@ -299,6 +299,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
 )
 def run(
+    sample_prefix: Optional[str] = None,
     study_name: Optional[str] = None,
     num_days: Optional[int] = None,
     num_samples: Optional[int] = None,
@@ -321,44 +322,16 @@ def run(
         Number of days of the study. Default: None
     num_samples : int, optional
         Number of samples per day. Default: None
-    sample_start_id : int, optional
-        ID of the first sample. Default: None
     subject_path : str, optional
         Path to the subject file. Default: None
     subject_column : str, optional
         Name of the column in the subject file that contains the subject IDs. Default: None
     num_subjects : int, optional
         Number of subjects. Default: None
-    has_subject_prefix : bool, optional
-        Whether the subject IDs have a prefix. Default: None
     subject_prefix : str, optional
         Prefix for subject IDs. Default: None
     has_evening_sample : bool, optional
         Whether the study has an evening sample. Default: None
-    add_name : bool, optional
-        Whether the subject name should be added to the label. Default: None
-    has_barcode : bool, optional
-        Whether the study has a barcode. Default: None
-    output_dir : str, optional
-        Path to the output directory. Default: None
-    generate_barcode : bool, optional
-        Whether a barcode label should be generated. Default: None
-    generate_qr : bool, optional
-        Whether a QR code should be generated. Default: None
-    output_name_label : str, optional
-        Name of the generated barcode label file. Default: None
-    output_name_qr : str, optional
-        Name of the generated QR code file. Default: None
-    default_layout : bool, optional
-        Whether the default layout (Avery Zweckform J4791) should be used. Default: None
-    saliva_distances : str, optional
-        The duration between saliva samples in minutes. Default: None
-    contact_email : str, optional
-        The E-Mail Address that will be used as default when sharing data from CARWatch app. Default: None
-    check_duplicates : bool, optional
-        Whether the CARWatch app will check for every barcode, if it was scanned before. Default: None
-    enable_manual_scan : bool, optional
-        Whether the CARWatch app will allow manual scanning of sample barcodes apart from timed alarms. Default: None
     **kwargs : dict
         Additional keyword arguments.
 
@@ -393,6 +366,7 @@ def run(
         subject_column=subject_column,
         subject_prefix=subject_prefix,
         has_evening_sample=has_evening_sample,
+        sample_prefix=sample_prefix,
     )
 
     if kwargs["generate_barcode"]:
@@ -412,7 +386,6 @@ def _generate_barcode(study: Study, **kwargs):
         study=study,
         add_name=kwargs["add_name"],
         has_barcode=kwargs["has_barcode"],
-        sample_prefix=kwargs["sample_prefix"],
     )
     if not kwargs["default_layout"]:
         layout = CustomLayout(

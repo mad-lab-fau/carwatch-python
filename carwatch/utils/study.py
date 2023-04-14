@@ -23,6 +23,7 @@ class Study:
         subject_column: Optional[str] = "subject",
         subject_prefix: Optional[str] = None,
         has_evening_sample: bool = False,
+        sample_prefix: Optional[str] = "S",
         start_sample_from_zero: bool = False,
     ):
         """Class that represents a study.
@@ -46,6 +47,8 @@ class Study:
             Add prefix to participant number (e.g., "VP_")
         has_evening_sample: bool, optional
             Whether a biomarker sample in the evening is also collected, default is ``False``
+        sample_prefix: str, optional
+            Abbreviation of the type of sample taken, default is ``'S'`` for 'Saliva'
         start_sample_from_zero: bool, optional
             Whether the ID of the first biomarker sample is 0, default is ``False``
             When set to ``False``, ID starts from 1
@@ -72,6 +75,7 @@ class Study:
         self.subject_prefix = subject_prefix
         self.has_evening_sample = has_evening_sample
         self.start_sample_from_zero = start_sample_from_zero
+        self.sample_prefix = sample_prefix
 
     @staticmethod
     def _determine_subject_ids(subject_path: Union[str, Path], subject_column: str) -> Optional[Sequence[str]]:

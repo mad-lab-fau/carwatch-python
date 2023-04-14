@@ -101,6 +101,8 @@ class QrCodeGenerator:
 
         app_id = "CARWATCH"
         name_string = ",".join(str(dist) for dist in subject_names)
+        start_sample = 0 if self.study.start_sample_from_zero else 1
+        start_sample = f"{self.study.sample_prefix}{start_sample}"
         distance_string = ",".join(str(dist) for dist in self.saliva_distances)
 
         # create encoding
@@ -109,13 +111,14 @@ class QrCodeGenerator:
             f"N:{study_name};"
             f"D:{self.study.num_days};"
             f"S:{name_string};"
+            f"SS:{start_sample};"
             f"T:{distance_string};"
             f"E:{int(self.study.has_evening_sample)};"
             f"M:{self.contact};"
             f"FD:{int(self.check_duplicates)};"
             f"FM:{int(self.enable_manual_scan)}"
         )
-
+        print(data)
         # create qr code
         img = qrcode.make(data)
         return img
