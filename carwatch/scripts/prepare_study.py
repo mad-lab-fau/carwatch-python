@@ -299,29 +299,14 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
 )
 def run(
-    sample_prefix: Optional[str] = None,
     study_name: Optional[str] = None,
     num_days: Optional[int] = None,
     num_samples: Optional[int] = None,
-    sample_start_id: Optional[int] = None,
     subject_path: Optional[str] = None,
     subject_column: Optional[str] = None,
     num_subjects: Optional[int] = None,
-    has_subject_prefix: Optional[bool] = None,  # pylint: disable=unused-argument
     subject_prefix: Optional[str] = None,
     has_evening_sample: Optional[bool] = None,
-    add_name: Optional[bool] = None,
-    has_barcode: Optional[bool] = None,
-    generate_barcode: Optional[bool] = None,
-    generate_qr: Optional[bool] = None,
-    output_name_label: Optional[str] = None,
-    output_name_qr: Optional[str] = None,
-    default_layout: Optional[bool] = None,
-    saliva_distances: Optional[str] = None,
-    contact_email: Optional[str] = None,
-    check_duplicates: Optional[bool] = None,
-    enable_manual_scan: Optional[bool] = None,
-    output_dir: Optional[str] = None,
     **kwargs,
 ):
     """Generate barcode labels and QR codes for CAR study.
@@ -392,11 +377,11 @@ def run(
     t = threading.Thread(target=animate)
     t.start()
 
-    if not generate_qr and not generate_barcode:
+    if not kwargs["generate_qr"] and not kwargs["generate_barcode"]:
         done = True
         raise click.UsageError("Nothing to do, no output generated.")
 
-    start_sample_from_zero = sample_start_id == 0
+    start_sample_from_zero = kwargs["sample_start_id"] == 0
 
     study = Study(
         study_name=study_name,
@@ -410,27 +395,26 @@ def run(
         has_evening_sample=has_evening_sample,
     )
 
-    if generate_barcode:
-        _generate_barcode(
-            study, add_name, has_barcode, sample_prefix, default_layout, output_dir, output_name_label, **kwargs
-        )
-    if generate_qr:
+    if kwargs["generate_barcode"]:
+        _generate_barcode(study, **kwargs)
+    if kwargs["generate_qr"]:
         try:
-            _generate_qr_code(
-                study, saliva_distances, contact_email, check_duplicates, enable_manual_scan, output_dir, output_name_qr
-            )
+            _generate_qr_code(study, **kwargs)
         except ValueError as e:
             done = True
-            raise click.BadParameter(str(e))
+            raise click.BadParameter(str(e)) from e
 
     done = True
 
 
-def _generate_barcode(
-    study, add_name, has_barcode, sample_prefix, default_layout, output_dir, output_name_label, **kwargs
-):
-    generator = LabelGenerator(study=study, add_name=add_name, has_barcode=has_barcode, sample_prefix=sample_prefix)
-    if not default_layout:
+def _generate_barcode(study: Study, **kwargs):
+    generator = LabelGenerator(
+        study=study,
+        add_name=kwargs["add_name"],
+        has_barcode=kwargs["has_barcode"],
+        sample_prefix=kwargs["sample_prefix"],
+    )
+    if not kwargs["default_layout"]:
         layout = CustomLayout(
             num_cols=kwargs["num_cols"],
             num_rows=kwargs["num_rows"],
@@ -441,30 +425,28 @@ def _generate_barcode(
             inter_col=kwargs["inter_col"],
             inter_row=kwargs["inter_row"],
         )
-        generator.generate(output_dir=output_dir, output_name=output_name_label, layout=layout)
+        generator.generate(output_dir=kwargs["output_dir"], output_name=kwargs["output_name_label"], layout=layout)
     else:
-        generator.generate(output_dir=output_dir, output_name=output_name_label)
+        generator.generate(output_dir=kwargs["output_dir"], output_name=kwargs["output_name_label"])
 
 
-def _generate_qr_code(
-    study, saliva_distances, contact_email, check_duplicates, enable_manual_scan, output_dir, output_name_qr
-):
-    saliva_distances = _parse_saliva_distances(saliva_distances)
+def _generate_qr_code(study, **kwargs):
+    saliva_distances = _parse_saliva_distances(kwargs["saliva_distances"])
     generator = QrCodeGenerator(
         study=study,
         saliva_distances=saliva_distances,
-        contact_email=contact_email,
-        check_duplicates=check_duplicates,
-        enable_manual_scan=enable_manual_scan,
+        contact_email=kwargs["contact_email"],
+        check_duplicates=kwargs["check_duplicates"],
+        enable_manual_scan=kwargs["enable_manual_scan"],
     )
-    generator.generate(output_dir=output_dir, output_name=output_name_qr)
+    generator.generate(output_dir=kwargs["output_dir"], output_name=kwargs["output_name_qr"])
 
 
 def _parse_saliva_distances(saliva_distances: Union[Sequence[str], str]) -> Union[int, Sequence[int]]:
     saliva_distances = saliva_distances.replace(" ", "")  # trim spaces
     # list of int
     if "," in saliva_distances:
-        saliva_distances = [eval(dist) for dist in saliva_distances.split(",")]  # pylint: disable=eval-used
+        saliva_distances = [int(dist) for dist in saliva_distances.split(",")]  # pylint: disable=eval-used
         return saliva_distances
 
     return int(saliva_distances)
