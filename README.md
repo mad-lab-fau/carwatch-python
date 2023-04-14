@@ -128,7 +128,8 @@ to the directory specified by `output_dir` (per default: the current working dir
 
 ```python
 from carwatch.utils import Study
-from carwatch.labels import CustomLayout, LabelGenerator
+from carwatch.labels.print_layout import CustomLayout
+from carwatch.labels.label_generator import LabelGenerator
 
 study = Study(
     study_name="ExampleStudy",
