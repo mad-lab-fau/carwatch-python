@@ -1,7 +1,7 @@
 """Module for generating QR codes to configure a study for the CARWatch app."""
 import sys
 from pathlib import Path
-from typing import Sequence, Union
+from typing import Sequence, Union, Optional
 
 import qrcode
 from qrcode.image.pil import PilImage
@@ -51,7 +51,7 @@ class QrCodeGenerator:
         self.output_dir = None
         self.output_name = f"qr_code_{self.study.study_name}"
 
-    def generate(self, output_dir: str = ".", output_name: Union[str, None] = None):
+    def generate(self, output_dir: str = ".", output_name: Optional[str] = None):  # pragma: no cover
         """Generate a `*.png` file with QR code according to the properties of the created ``QrCodeGenerator``.
 
         Parameters
@@ -59,10 +59,11 @@ class QrCodeGenerator:
         output_dir: str
             Path to the directory where the generated QR-Code will be stored
         output_name: str, optional
-            Filename of the generated QR-Code
+            Filename of the generated QR-Code.
 
         """
         output_dir = Path(output_dir)
+        output_name = Path(output_name)
         try:
             assert_is_dir(output_dir)
         except ValueError as e:
@@ -70,9 +71,9 @@ class QrCodeGenerator:
             sys.exit(1)
         self.output_dir = output_dir
         if output_name:
-            if output_name.endswith(".png"):
+            if output_name.suffix == ".png":
                 # store without file ending
-                output_name = output_name.rsplit(".", 1)[0]
+                output_name = output_name.stem
             self.output_name = output_name
         qr_img = self._generate_qr_code()
         self._save_qr_img(qr_img)
