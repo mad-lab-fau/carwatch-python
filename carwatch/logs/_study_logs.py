@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Tuple, Sequence
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Sequence, Tuple
 
 import pandas as pd
 
@@ -123,22 +123,22 @@ class StudyLogs:
 
     def export_times(
         self,
-        include_sampling_times: Optional[bool] = True,
+        sampling_times: Optional[bool] = True,
+        awakening_times: Optional[bool] = True,
         include_evening_sample: Optional[bool] = True,
-        include_awakening_times: Optional[bool] = True,
-        wide_format: Optional[bool] = True,
+        wide_format: Optional[bool] = False,
     ) -> pd.DataFrame:
         """Export the sampling and/or awakening times of all log files from the study as a :class:`~pandas.DataFrame`.
 
         Parameters
         ----------
-        include_sampling_times : bool, optional
+        sampling_times : bool, optional
             ``True`` to include sampling times, ``False`` to exclude. Default: ``True``
+        awakening_times : bool, optional
+            ``True`` to include awakening times, ``False`` to exclude. Default: ``True``
         include_evening_sample : bool, optional
             ``True`` to include evening sampling times, ``False`` to only include morning sampling times.
             Default: ``True``
-        include_awakening_times : bool, optional
-            ``True`` to include awakening times, ``False`` to exclude. Default: ``True``
         wide_format : bool, optional
             ``True`` to return a wide format dataframe where one row represents one participant, ``False`` to return a
             dataframe where one row represents one day/night. Default: ``False``
@@ -151,9 +151,9 @@ class StudyLogs:
         """
         data_dict = {
             key: participant_logs.export_times(
-                sampling_times=include_sampling_times,
+                sampling_times=sampling_times,
+                awakening_times=awakening_times,
                 include_evening_sample=include_evening_sample,
-                awakening_times=include_awakening_times,
                 wide_format=wide_format,
             )
             for key, participant_logs in self._study_logs.items()

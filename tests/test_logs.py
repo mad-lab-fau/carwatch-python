@@ -704,8 +704,357 @@ class TestStudyLogs:
         for key in study_logs:
             logs = get_correct_zip_file_path(key)
             expected = ParticipantLogs.from_zip_file(logs).data_as_df()
-
             assert_frame_equal(out.xs(key, level="subject"), expected)
+
+    @pytest.mark.parametrize(
+        ("sampling_times", "awakening_times", "include_evening_sample", "expected"),
+        [
+            (
+                True,
+                True,
+                True,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "date": [
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-09",
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-09",
+                        "2019-12-06",
+                        "2019-12-07",
+                        "2019-12-08",
+                    ],
+                    "day_id": [1, 2, 3] * 3,
+                    "columns": [
+                        "awakening_time",
+                        "awakening_type",
+                        "sampling_time_S1",
+                        "sampling_time_S2",
+                        "sampling_time_S3",
+                        "sampling_time_S4",
+                        "sampling_time_S5",
+                        "sampling_time_SA",
+                    ],
+                },
+            ),
+            (
+                True,
+                True,
+                False,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "date": [
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-06",
+                        "2019-12-07",
+                        "2019-12-08",
+                    ],
+                    "day_id": [1, 2, 1, 2, 1, 2, 3],
+                    "columns": [
+                        "awakening_time",
+                        "awakening_type",
+                        "sampling_time_S1",
+                        "sampling_time_S2",
+                        "sampling_time_S3",
+                        "sampling_time_S4",
+                        "sampling_time_S5",
+                    ],
+                },
+            ),
+            (
+                True,
+                False,
+                True,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "date": [
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-09",
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-09",
+                        "2019-12-06",
+                        "2019-12-07",
+                        "2019-12-08",
+                    ],
+                    "day_id": [1, 2, 3] * 3,
+                    "columns": [
+                        "sampling_time_S1",
+                        "sampling_time_S2",
+                        "sampling_time_S3",
+                        "sampling_time_S4",
+                        "sampling_time_S5",
+                        "sampling_time_SA",
+                    ],
+                },
+            ),
+            (
+                True,
+                False,
+                False,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "date": [
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-06",
+                        "2019-12-07",
+                    ],
+                    "day_id": [1, 2] * 3,
+                    "columns": [
+                        "sampling_time_S1",
+                        "sampling_time_S2",
+                        "sampling_time_S3",
+                        "sampling_time_S4",
+                        "sampling_time_S5",
+                    ],
+                },
+            ),
+            (
+                False,
+                True,
+                True,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "date": [
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-06",
+                        "2019-12-07",
+                        "2019-12-08",
+                    ],
+                    "day_id": [1, 2, 1, 2, 1, 2, 3],
+                    "columns": [
+                        "awakening_time",
+                        "awakening_type",
+                    ],
+                },
+            ),
+            (
+                False,
+                True,
+                False,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "date": [
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-07",
+                        "2019-12-08",
+                        "2019-12-06",
+                        "2019-12-07",
+                        "2019-12-08",
+                    ],
+                    "day_id": [1, 2, 1, 2, 1, 2, 3],
+                    "columns": [
+                        "awakening_time",
+                        "awakening_type",
+                    ],
+                },
+            ),
+        ],
+    )
+    def test_export_times(self, sampling_times, awakening_times, include_evening_sample, expected):
+        study_logs = StudyLogs.from_folder(get_correct_folder_path_zip())
+        out = study_logs.export_times(
+            sampling_times=sampling_times,
+            awakening_times=awakening_times,
+            include_evening_sample=include_evening_sample,
+        )
+
+        TestCase().assertListEqual(list(out.index.get_level_values("subject").unique()), expected["subject"])
+        TestCase().assertListEqual(list(out.index.get_level_values("date")), expected["date"])
+        TestCase().assertListEqual(list(out.index.get_level_values("day_id")), expected["day_id"])
+        TestCase().assertListEqual(list(out.columns), expected["columns"])
+
+    @pytest.mark.parametrize(
+        "sampling_times, awakening_times, include_evening_sample, expected",
+        [
+            (
+                True,
+                True,
+                True,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "columns": [
+                        "date_D1",
+                        "awakening_time_D1",
+                        "awakening_type_D1",
+                        "sampling_time_S1_D1",
+                        "sampling_time_S2_D1",
+                        "sampling_time_S3_D1",
+                        "sampling_time_S4_D1",
+                        "sampling_time_S5_D1",
+                        "sampling_time_SA_D1",
+                        "date_D2",
+                        "awakening_time_D2",
+                        "awakening_type_D2",
+                        "sampling_time_S1_D2",
+                        "sampling_time_S2_D2",
+                        "sampling_time_S3_D2",
+                        "sampling_time_S4_D2",
+                        "sampling_time_S5_D2",
+                        "sampling_time_SA_D2",
+                        "date_D3",
+                        "awakening_time_D3",
+                        "awakening_type_D3",
+                        "sampling_time_S1_D3",
+                        "sampling_time_S2_D3",
+                        "sampling_time_S3_D3",
+                        "sampling_time_S4_D3",
+                        "sampling_time_S5_D3",
+                        "sampling_time_SA_D3",
+                    ],
+                },
+            ),
+            (
+                True,
+                True,
+                False,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "columns": [
+                        "date_D1",
+                        "awakening_time_D1",
+                        "awakening_type_D1",
+                        "sampling_time_S1_D1",
+                        "sampling_time_S2_D1",
+                        "sampling_time_S3_D1",
+                        "sampling_time_S4_D1",
+                        "sampling_time_S5_D1",
+                        "date_D2",
+                        "awakening_time_D2",
+                        "awakening_type_D2",
+                        "sampling_time_S1_D2",
+                        "sampling_time_S2_D2",
+                        "sampling_time_S3_D2",
+                        "sampling_time_S4_D2",
+                        "sampling_time_S5_D2",
+                        "date_D3",
+                        "awakening_time_D3",
+                        "awakening_type_D3",
+                        "sampling_time_S1_D3",
+                        "sampling_time_S2_D3",
+                        "sampling_time_S3_D3",
+                        "sampling_time_S4_D3",
+                        "sampling_time_S5_D3",
+                    ],
+                },
+            ),
+            (
+                True,
+                False,
+                False,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "columns": [
+                        "date_D1",
+                        "sampling_time_S1_D1",
+                        "sampling_time_S2_D1",
+                        "sampling_time_S3_D1",
+                        "sampling_time_S4_D1",
+                        "sampling_time_S5_D1",
+                        "date_D2",
+                        "sampling_time_S1_D2",
+                        "sampling_time_S2_D2",
+                        "sampling_time_S3_D2",
+                        "sampling_time_S4_D2",
+                        "sampling_time_S5_D2",
+                    ],
+                },
+            ),
+            (
+                True,
+                False,
+                True,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "columns": [
+                        "date_D1",
+                        "sampling_time_S1_D1",
+                        "sampling_time_S2_D1",
+                        "sampling_time_S3_D1",
+                        "sampling_time_S4_D1",
+                        "sampling_time_S5_D1",
+                        "sampling_time_SA_D1",
+                        "date_D2",
+                        "sampling_time_S1_D2",
+                        "sampling_time_S2_D2",
+                        "sampling_time_S3_D2",
+                        "sampling_time_S4_D2",
+                        "sampling_time_S5_D2",
+                        "sampling_time_SA_D2",
+                        "date_D3",
+                        "sampling_time_S1_D3",
+                        "sampling_time_S2_D3",
+                        "sampling_time_S3_D3",
+                        "sampling_time_S4_D3",
+                        "sampling_time_S5_D3",
+                        "sampling_time_SA_D3",
+                    ],
+                },
+            ),
+            (
+                False,
+                True,
+                True,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "columns": [
+                        "date_D1",
+                        "awakening_time_D1",
+                        "awakening_type_D1",
+                        "date_D2",
+                        "awakening_time_D2",
+                        "awakening_type_D2",
+                        "date_D3",
+                        "awakening_time_D3",
+                        "awakening_type_D3",
+                    ],
+                },
+            ),
+            (
+                False,
+                True,
+                False,
+                {
+                    "subject": ["AB12C", "DE34F", "GH56I"],
+                    "columns": [
+                        "date_D1",
+                        "awakening_time_D1",
+                        "awakening_type_D1",
+                        "date_D2",
+                        "awakening_time_D2",
+                        "awakening_type_D2",
+                        "date_D3",
+                        "awakening_time_D3",
+                        "awakening_type_D3",
+                    ],
+                },
+            ),
+        ],
+    )
+    def test_export_times_wide(self, sampling_times, awakening_times, include_evening_sample, expected):
+        study_logs = StudyLogs.from_folder(get_correct_folder_path_zip())
+        out = study_logs.export_times(
+            sampling_times=sampling_times,
+            awakening_times=awakening_times,
+            include_evening_sample=include_evening_sample,
+            wide_format=True,
+        )
+
+        TestCase().assertListEqual(list(out.index.get_level_values("subject").unique()), expected["subject"])
+        TestCase().assertListEqual(list(out.columns), expected["columns"])
 
     @pytest.fixture(autouse=True)
     def after_test(self):
