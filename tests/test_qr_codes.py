@@ -51,7 +51,7 @@ class TestQrCodeGenerator:
     def test_generate_qr_code(
         self, study, saliva_distances, contact_email, check_duplicates, enable_manual_scan, expected
     ):
-        qr_code = QrCodeGenerator(
+        QrCodeGenerator(
             study=study,
             saliva_distances=saliva_distances,
             contact_email=contact_email,

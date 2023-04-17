@@ -1,7 +1,7 @@
 """Module for generating QR codes to configure a study for the CARWatch app."""
 import sys
 from pathlib import Path
-from typing import Sequence, Union, Optional
+from typing import Optional, Sequence, Union
 
 import qrcode
 from qrcode.image.pil import PilImage

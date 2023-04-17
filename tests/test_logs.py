@@ -17,7 +17,7 @@ from carwatch.utils.exceptions import FileExtensionError, LogDataParseError
 
 TEST_DATA_PATH = Path(__file__).parent.joinpath("test_data")
 
-from pandas._testing import assert_frame_equal, assert_series_equal
+from pandas._testing import assert_frame_equal
 
 
 @contextmanager
@@ -26,11 +26,11 @@ def does_not_raise():
 
 
 def get_correct_folder_path_zip() -> Path:
-    return TEST_DATA_PATH.joinpath(f"correct/zip_files")
+    return TEST_DATA_PATH.joinpath("correct/zip_files")
 
 
 def get_correct_folder_path_folders() -> Path:
-    return TEST_DATA_PATH.joinpath(f"correct/folders")
+    return TEST_DATA_PATH.joinpath("correct/folders")
 
 
 def get_correct_zip_file_path(participant_id: str) -> Path:
@@ -878,7 +878,7 @@ class TestStudyLogs:
         TestCase().assertListEqual(list(out.columns), expected["columns"])
 
     @pytest.mark.parametrize(
-        "sampling_times, awakening_times, include_evening_sample, expected",
+        ("sampling_times", "awakening_times", "include_evening_sample", "expected"),
         [
             (
                 True,
