@@ -25,13 +25,13 @@ class LabelGenerator:
     EAN8 = barcode.get_barcode_class("ean8")
     MAX_NAME_LEN = 12
 
-    def __init__(self, study: Study, has_barcode: bool = False, add_name: bool = False, sample_prefix: str = "S"):
+    def __init__(self, study: Study, has_barcode: bool = False, add_name: bool = False):
         """Generate printable PDF files with labels for all biomarker samples taken within a study.
 
         If the parameter ``add_name`` is ``True`` then the text next to the barcode will have the following layout:
         ```
         <study_name>_<subject_id>
-        T<day>_<sample_prefix><sample_id or A for evening sample>
+        T<day>_<study.sample_prefix><sample_id or A for evening sample>
         ```
         For example:
         ```
@@ -41,7 +41,7 @@ class LabelGenerator:
 
         If ``add_name`` is set to ``False`` then only the second line is printed:
         ```
-        T<day>_<sample_prefix><sample_id or A for evening sample>
+        T<day>_<study.sample_prefix><sample_id or A for evening sample>
         ```
         For example:
         ```
@@ -56,13 +56,12 @@ class LabelGenerator:
             Whether a barcode of type `EAN-8` will be printed on each label
         add_name: bool, optional
             Whether the name of the study will be printed on each label
-        sample_prefix: str, optional
-            Abbreviation of the type of sample taken, default is ``'S'`` for 'Saliva'
 
         Examples
         --------
         Create a Study and print labels for a custom layout
-        >>> from carwatch.labels import LabelGenerator, CustomLayout
+        >>> from carwatch.labels import LabelGenerator
+        >>> from carwatch.labels.print_layout import CustomLayout
         >>> from carwatch.utils import Study
         >>> Study(
         >>>     study_name="ExampleStudy", num_days=3, num_subjects=4, num_samples=5, has_evening_sample=True
@@ -78,7 +77,7 @@ class LabelGenerator:
         self.study = study
         self.has_barcode = has_barcode
         self.add_name = add_name
-        self.sample_prefix = sanitize_str_for_tex(sample_prefix)
+        self.sample_prefix = sanitize_str_for_tex(self.study.sample_prefix)
         self.output_dir = None
         self.output_name = f"barcodes_{self.study.study_name}"
         self.layout = None

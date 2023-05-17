@@ -105,7 +105,7 @@ exclude = [
 ]
 
 [pylint]
-max-args = 10
+max-args = 15
 
 [pydocstyle]
 convention = "numpy"
