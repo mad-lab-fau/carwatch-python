@@ -356,6 +356,9 @@ def run(
 
     start_sample_from_zero = kwargs["sample_start_id"] == 0
 
+    if not kwargs["has_subject_prefix"]:
+        subject_prefix = ""
+
     study = Study(
         study_name=study_name,
         num_days=num_days,

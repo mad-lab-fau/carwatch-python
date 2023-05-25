@@ -119,7 +119,6 @@ class QrCodeGenerator:
             f"FD:{int(self.check_duplicates)};"
             f"FM:{int(self.enable_manual_scan)}"
         )
-        print(data)
         # create qr code
         img = qrcode.make(data)
         return img

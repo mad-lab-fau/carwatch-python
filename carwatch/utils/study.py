@@ -129,7 +129,7 @@ class Study:
             return self.subject_ids[subject_index]
         # use padding and prefix if specified
         subject_name_padding = len(str(self.num_subjects))  # length of zero-padding depending on subject count
-        subject_name = f"{subject_index:0{subject_name_padding}d}"
+        subject_name = f"{subject_index+1:0{subject_name_padding}d}"
         if self.subject_prefix:
             subject_name = f"{self.subject_prefix}{subject_name}"
         return subject_name
