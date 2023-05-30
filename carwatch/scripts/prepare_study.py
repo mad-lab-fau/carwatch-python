@@ -89,9 +89,9 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
 @click.option(
     "--num-samples",
     required=True,
-    prompt="Number of biomarker samples [per day]",
+    prompt="Number of biomarker samples [during the day, WITHOUT evening sample]",
     type=int,
-    help="The daily number of biomarker samples taken from every participant.",
+    help="The daily number of biomarker samples taken throughout the day from every participant. This number does not include the evening sample.",
 )
 @click.option(
     "--sample_prefix",
@@ -117,9 +117,9 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
 )
 @click.option(
     "--has-evening-sample",
-    prompt="Evening sample taken?",
+    prompt="Additional evening sample taken?",
     is_flag=True,
-    help="Whether a biomarker sample is taken in the evening.",
+    help="Whether an additional biomarker sample is taken in the evening.",
     cls=NumericChoice,
     chosen_number="study_type",
     option_map=EVENING_OPTION,
