@@ -31,21 +31,21 @@ class LabelGenerator:
         If the parameter ``add_name`` is ``True`` then the text next to the barcode will have the following layout:
         ```
         <study_name>_<subject_id>
-        T<day>_<study.sample_prefix><sample_id or A for evening sample>
+        D<day>_<study.sample_prefix><sample_id or E for evening sample>
         ```
         For example:
         ```
         ExampleStudy_01
-        T1_S4
+        D1_S4
         ```
 
         If ``add_name`` is set to ``False`` then only the second line is printed:
         ```
-        T<day>_<study.sample_prefix><sample_id or A for evening sample>
+        D<day>_<study.sample_prefix><sample_id or E for evening sample>
         ```
         For example:
         ```
-        T0_SA
+        D0_SE
         ```
 
         Parameters
@@ -277,8 +277,8 @@ class LabelGenerator:
             label_head = "\\genericlabel\n\\begin{center}\n\\begin{tabular}"
             label_foot = "\\end{tabular}\n\\end{center}\n\n"
         if self.study.has_evening_sample and all([sample == self.study.num_samples - 1]):
-            # if last sample of the day is evening sample, it is marked with "A"
-            sample_name = "A"
+            # if last sample of the day is evening sample, it is marked with "E"
+            sample_name = "E"
         if self.add_name:
             delimiter = r"\_"
             if len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
@@ -289,20 +289,20 @@ class LabelGenerator:
                 # insert infos as one row in the second column
                 table_content += (
                     f"{font_size}{{{study_name}{delimiter}{subject_name}"
-                    f"\\newline T{day}\\_{self.sample_prefix}{sample_name}}}\n"
+                    f"\\newline D{day}\\_{self.sample_prefix}{sample_name}}}\n"
                 )
             elif len(study_name) + len(subject_name) > LabelGenerator.MAX_NAME_LEN:
                 # insert infos centered in two rows
                 table_content += (
-                    f"{font_size}{{{study_name}}}\\\\{{{subject_name}\\_T{day}\\_{self.sample_prefix}{sample_name}}}\n"
+                    f"{font_size}{{{study_name}}}\\\\{{{subject_name}\\_D{day}\\_{self.sample_prefix}{sample_name}}}\n"
                 )
             else:
                 table_content += (
-                    f"{font_size}{{{study_name}\\_{subject_name}}}\\\\{{T{day}\\_{self.sample_prefix}{sample_name}}}\n"
+                    f"{font_size}{{{study_name}\\_{subject_name}}}\\\\{{D{day}\\_{self.sample_prefix}{sample_name}}}\n"
                 )
         else:
             # add day and sample to second column
-            table_content += f"\\centering{font_size}{{T{day}\\_{self.sample_prefix}{sample_name}}}\n"
+            table_content += f"\\centering{font_size}{{D{day}\\_{self.sample_prefix}{sample_name}}}\n"
         label_tex = label_head + table_properties + table_content + label_foot
         return label_tex
 
