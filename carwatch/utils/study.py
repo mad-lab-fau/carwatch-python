@@ -35,7 +35,7 @@ class Study:
         num_days: int
             Number of days the study will be conducted
         num_samples: int
-            *Total* number of biomarker samples per day (including a potential evening sample!)
+            Number of biomarker samples per day (*excluding* a potential evening sample!)
         num_subjects: int, optional
             Number of subjects in the study
         subject_path: str or :class:`~pathlib.Path`, optional
@@ -46,7 +46,7 @@ class Study:
         subject_prefix: str, optional
             Add prefix to participant number (e.g., "VP_")
         has_evening_sample: bool, optional
-            Whether a biomarker sample in the evening is also collected, default is ``False``
+            Whether an *additional* biomarker sample in the evening is collected, default is ``False``
         sample_prefix: str, optional
             Abbreviation of the type of sample taken, default is ``'S'`` for 'Saliva'
         start_sample_from_zero: bool, optional
@@ -180,4 +180,7 @@ class Study:
             list of sample indices
 
         """
-        return list(range(0, self.num_samples))
+        if self.has_evening_sample:
+            return list(range(0, self.num_samples + 1))
+        else:
+            return list(range(0, self.num_samples))

@@ -276,7 +276,7 @@ class LabelGenerator:
             # center text in label
             label_head = "\\genericlabel\n\\begin{center}\n\\begin{tabular}"
             label_foot = "\\end{tabular}\n\\end{center}\n\n"
-        if self.study.has_evening_sample and all([sample == self.study.num_samples - 1]):
+        if self.study.has_evening_sample and all([sample == self.study.num_samples]):
             # if last sample of the day is evening sample, it is marked with "E"
             sample_name = "E"
         if self.add_name:
