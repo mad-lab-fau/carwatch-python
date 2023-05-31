@@ -91,7 +91,8 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     required=True,
     prompt="Number of biomarker samples [during the day, WITHOUT evening sample]",
     type=int,
-    help="The daily number of biomarker samples taken throughout the day from every participant. This number does not include the evening sample.",
+    help="The daily number of biomarker samples taken throughout the day from every participant. "
+    "This number does not include the evening sample.",
 )
 @click.option(
     "--sample_prefix",

@@ -182,5 +182,4 @@ class Study:
         """
         if self.has_evening_sample:
             return list(range(0, self.num_samples + 1))
-        else:
-            return list(range(0, self.num_samples))
+        return list(range(0, self.num_samples))
