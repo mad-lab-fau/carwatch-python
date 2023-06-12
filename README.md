@@ -186,9 +186,11 @@ To be added
 ### Command Line Interface
 
 For the preparation steps, `carwatch` also provides a CLI for more convenient usage.
-Make sure you installed the `carwatch` package with `pip install carwatch`. After that, you can simply run the preparation CLI by running
+Make sure you installed the `carwatch` package with `pip install carwatch`.
+
+After that, you can simply run the TUI (terminal user interface) by running
 ```
-prepare_study
+prepare_study tui
 ```
 in a terminal session.
 
@@ -196,10 +198,14 @@ This will implicitly run the `scripts/prepare_study.py` script, which will guide
 You will then be prompted to enter all the required information step-by-step. The desired output files will 
 be automatically generated for you.
 
-For more information about the prompted commands please run:
-
+The regular command line interface (CLI) can be used by running
 ```
-prepare_study --help
+prepare_study run
+```
+
+For more information about the prompted commands please run:
+```
+prepare_study run --help
 ```
 
 ## License
