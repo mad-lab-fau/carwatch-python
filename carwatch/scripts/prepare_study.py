@@ -6,6 +6,7 @@ import time
 from typing import Optional, Sequence, Union
 
 import click
+from trogon import tui
 
 from carwatch.labels import LabelGenerator
 from carwatch.labels.print_layout import CustomLayout
@@ -25,6 +26,7 @@ DEFAULT_BARCODE_FILE_SUFFIX = "_barcodes"
 DEFAULT_QR_FILE_SUFFIX = "_qr_code"
 
 
+@tui()
 @click.command()
 @click.option(
     "--study-name", required=True, prompt="Study name", type=str, help="A descriptive abbreviation for your study name."
@@ -36,6 +38,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     "--subject-data",
     required=True,
     prompt="Read subject IDs from file?",
+    help="Whether the subject IDs should be read from a file.",
     is_flag=True,
 )
 @click.option(
@@ -72,6 +75,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
 @click.option(
     "--has-subject-prefix",
     prompt="Add prefix to participant number (e.g., 'VP_')?",
+    help="Whether a prefix should be added to the participant number.",
     is_flag=True,
     cls=Condition,
     neg_condition="subject_path",
@@ -107,6 +111,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     required=True,
     default=0,
     prompt="Should biomarker IDs start at 0 or at 1 (i.e., S0 vs. S1)?",
+    help="Whether the biomarker IDs should start at 0 or at 1.",
     type=click.IntRange(0, 1),
 )
 @click.option(
@@ -114,6 +119,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     required=True,
     default=CAR_STUDY,
     prompt="Type of study? (1 for CAR study, 2 for Lab-based study, 3 for Other)?",
+    help="The type of study. 1 for CAR study, 2 for Lab-based study, 3 for Other.",
     type=click.IntRange(1, len(STUDY_TYPES)),
 )
 @click.option(

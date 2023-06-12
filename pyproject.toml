@@ -26,6 +26,7 @@ seaborn = { version = "^0.11.2", optional = true }
 ipywidgets = {version = "^8", optional = true}
 ipympl = {version = "^0.9", optional = true}
 fau_colors = {version = "^1.6.0", optional=true}
+trogon = "^0.4.0"
 
 [tool.poetry.extras]
 plotting = ["matplotlib", "seaborn", "ipywidgets", "ipympl", "fau_colors"]
