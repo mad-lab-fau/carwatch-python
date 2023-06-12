@@ -40,11 +40,11 @@ class TestQrCodeGenerator:
         [
             (
                 get_test_study(),
-                [30, 30, 30, 30, 30, 30, 30, 30],
+                [30, 30, 30, 30, 30, 30, 30, 30, 30],
                 "test@test.de",
                 True,
                 True,
-                "CARWATCH;N:test_study;D:5;S:20;T:30,30,30,30,30,30,30,30,30;E:True;M:",
+                "CARWATCH;N:test_study;D:5;S:20;T:30,30,30,30,30,30,30,30,30,30;E:True;M:",
             )
         ],
     )
