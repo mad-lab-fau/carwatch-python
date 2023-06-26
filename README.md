@@ -11,8 +11,8 @@
 **Get the Android app on the Play Store:**  
 [![Google Play](https://img.shields.io/badge/Google%20Play-CARWatch-3DDC84?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=de.fau.cs.mad.carwatch)
 
-CARWatch is an open-source framework to support **objective** and **low-cost** assessment of cortisol samples. 
-Its primary focus especially, but not limited to, during the **cortisol awakening response (CAR)** in real-world, unsupervised environments.
+CARWatch is an open-source framework to support **objective** and **low-cost** assessment of cortisol samples in real-world, unsupervised environments. It is especially suitable for **cortisol awakening response (CAR)** research, but not limited to this application.
+
 It consists of an [Android application](https://github.com/mad-lab-fau/carwatch-app) that schedules sampling times and tracks
 them by scanning a barcode on the respective sampling tube as well as a Python package that provides tools to 
 **configure studies** and **prepare the study materials** and to **process the log data** recorded by the app.
