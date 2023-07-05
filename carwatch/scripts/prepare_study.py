@@ -299,7 +299,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
 )
 @click.option(
     "--output_dir",
-    default=".",
+    default="./output",
     prompt="Output directory for generated files",
     help="Directory where generated files will be stored.",
     envvar="PATHS",

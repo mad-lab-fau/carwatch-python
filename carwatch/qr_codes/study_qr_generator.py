@@ -51,7 +51,7 @@ class QrCodeGenerator:
         self.output_dir = None
         self.output_name = f"qr_code_{self.study.study_name}"
 
-    def generate(self, output_dir: str = ".", output_name: Optional[str] = None):  # pragma: no cover
+    def generate(self, output_dir: str = "./output", output_name: Optional[str] = None):  # pragma: no cover
         """Generate a `*.png` file with QR code according to the properties of the created ``QrCodeGenerator``.
 
         Parameters
@@ -63,6 +63,7 @@ class QrCodeGenerator:
 
         """
         output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
         output_name = Path(output_name)
         try:
             assert_is_dir(output_dir)
