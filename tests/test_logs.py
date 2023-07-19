@@ -280,9 +280,8 @@ class TestParticipantLogs:
         [
             # study metadata
             ("subject_id", "AB12C"),
-            ("study_type", "CAR"),
             ("has_evening_sample", True),
-            ("time_points", [0, 15, 30, 45, 60]),
+            ("saliva_times", [0, 15, 15, 15, 15]),
             ("num_saliva_samples", 5),
             ("saliva_ids", {0: "S1", 1: "S2", 2: "S3", 3: "S4", 4: "S5", 5: "SA"}),
             # phone metadata
@@ -321,14 +320,14 @@ class TestParticipantLogs:
         assert logs_filtered.shape == (0, 0)
 
         logs_filtered = logs.filter_logs(date="2019-12-05")
-        assert logs_filtered.shape == (3, 2)
+        assert logs_filtered.shape == (4, 2)
         assert len(logs_filtered.index.normalize().unique()) == 1
 
         logs_filtered = logs.filter_logs(date="2019-12-04")
         assert logs_filtered.shape == (0, 2)
 
         logs_filtered = logs.filter_logs(date="")
-        assert logs_filtered.shape == (83, 2)
+        assert logs_filtered.shape == (84, 2)
 
     def test_get_extras_for_log_action(self):
         folder_path = get_correct_folder_path("AB12C")
@@ -364,7 +363,7 @@ class TestParticipantLogs:
         # assert that the datetime index is in UTC
         assert df.index.tz.zone == "Europe/Berlin"
 
-        assert df.shape == (83, 2)
+        assert df.shape == (84, 2)
         assert df.index.name == "time"
         _assert_has_columns(df, [["action", "extras"]])
 
@@ -410,10 +409,11 @@ class TestParticipantLogs:
         file_path = get_correct_zip_file_path("AB12C")
         log_data = ParticipantLogs.from_zip_file(file_path)
         data = log_data.split_sampling_days(split_into_nights=True, return_dict=True)
+        print(data.values())
         _assert_is_dtype(data, dict)
         assert len(data) == 4
         TestCase().assertListEqual(list(data.keys()), ["2019-12-05", "2019-12-07", "2019-12-08", "2019-12-09"])
-        TestCase().assertListEqual([len(x) for x in data.values()], [3, 40, 36, 4])
+        TestCase().assertListEqual([len(x) for x in data.values()], [4, 40, 36, 4])
         TestCase().assertListEqual(
             [x.index[0].normalize() == x.index[-1].normalize() for x in data.values()],
             [
@@ -431,7 +431,7 @@ class TestParticipantLogs:
         _assert_is_dtype(data, dict)
         assert len(data) == 4
         TestCase().assertListEqual(list(data.keys()), ["2019-12-05", "2019-12-06", "2019-12-07", "2019-12-08"])
-        TestCase().assertListEqual([len(x) for x in data.values()], [3, 10, 37, 33])
+        TestCase().assertListEqual([len(x) for x in data.values()], [4, 10, 37, 33])
         TestCase().assertListEqual(
             [x.index[0].normalize() == x.index[-1].normalize() for x in data.values()],
             [True, True, True, True],  # correctly split into days
@@ -560,6 +560,7 @@ class TestParticipantLogs:
     def test_sampling_times_missing_samples(self, include_evening_sample, expected):
         folder_path = get_missing_samples_folder_path("AB12C")
         log_data = ParticipantLogs.from_folder(folder_path)
+        print(log_data)
         sampling_times = log_data.sampling_times(include_evening_sample=include_evening_sample)
 
         _assert_is_dtype(sampling_times, pd.DataFrame)

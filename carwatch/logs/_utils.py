@@ -51,4 +51,5 @@ def filter_zip_file_for_logs(zip_ref: ZipFile) -> Sequence[ZipInfo]:
         and not f.filename.startswith(".")  # ignore hidden files
         and not f.filename.startswith("__")  # ignore hidden files
     ]
+    file_list.sort(key=lambda x: x.filename)
     return file_list

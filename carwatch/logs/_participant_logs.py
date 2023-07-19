@@ -440,7 +440,8 @@ class ParticipantLogs:
 
         """
         saliva_ids_str = self.study_metadata.get("saliva_ids")[1:-1]
-        return saliva_ids_str.split(", ")
+        saliva_ids_dict = {idx: saliva_id for idx, saliva_id in enumerate(saliva_ids_str.split(", "))}
+        return saliva_ids_dict
 
     @property
     def saliva_times(self) -> Sequence[int]:
@@ -731,6 +732,7 @@ class ParticipantLogs:
 
             # find the last barcode_scanned event for each saliva_id
             df = df.groupby("saliva_id", sort=False).last()
+            print(df)
             df = df.reset_index().set_index(["saliva_type", "saliva_id"])
             df = df.rename(self.saliva_ids, level="saliva_id")
             data_split[day] = df
