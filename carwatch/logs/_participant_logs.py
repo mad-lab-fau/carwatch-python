@@ -28,6 +28,7 @@ class ParticipantLogs:
             "version_security_patch",
             "version_release",
         ],
+        "study_metadata": ["study_name", "subject_list", "saliva_times", "study_days", "saliva_ids", "has_evening_salivette", "share_email_address", "check_duplicates", "manual_scan"],
         "subject_id_set": ["subject_id", "subject_condition"],
         "alarm_set": ["alarm_id", "timestamp", "is_repeating", "is_hidden", "hidden_timestamp"],
         "timer_set": ["alarm_id", "timestamp"],
@@ -80,6 +81,7 @@ class ParticipantLogs:
         self.log_dates: Optional[Sequence[pd.Timestamp]] = None
         self.app_metadata: Optional[Dict[str, Any]] = None
         self.phone_metadata: Optional[Dict[str, Any]] = None
+        self.study_metadata: Optional[Dict[str, Any]] = None
         self._extract_info()
 
     @classmethod
@@ -205,6 +207,8 @@ class ParticipantLogs:
         folder_path = Path(folder_path)
         if not folder_path.exists():
             raise FileNotFoundError(f"Folder {folder_path} does not exist.")
+        print(folder_path.glob("*.csv"))
+        print(sorted(folder_path.glob("*.csv")))
         file_list = sorted(folder_path.glob("*.csv"))
         if len(file_list) == 0:
             raise FileNotFoundError(f"No log files found in folder {folder_path}.")
@@ -308,16 +312,7 @@ class ParticipantLogs:
         # Phone Metadata
         self.phone_metadata = self.get_extras_for_log_action("phone_metadata")
         # Study Metadata
-        # TODO hardcoded for now, change after study metadata is implemented
-        self.study_metadata = {
-            "study_name": "Test",
-            "study_type": "CAR",
-            "num_days": 2,
-            "saliva_ids": {0: "S1", 1: "S2", 2: "S3", 3: "S4", 4: "S5", 5: "SA"},
-            "time_points": [0, 15, 30, 45, 60],
-            "has_evening_sample": True,
-        }
-        #  self.study_metadata = self.get_extras_for_log_action("study_metadata")
+        self.study_metadata = self.get_extras_for_log_action("study_metadata")
 
         # Log Info
         self.log_dates = np.array(list(self._data.index.normalize().unique()))
@@ -432,7 +427,7 @@ class ParticipantLogs:
             number of saliva samples
 
         """
-        return len(self.study_metadata.get("time_points"))
+        return len(self.saliva_times)
 
     @property
     def saliva_ids(self) -> Dict[int, str]:
@@ -444,10 +439,11 @@ class ParticipantLogs:
             mapping of saliva indices to saliva ids
 
         """
-        return self.study_metadata.get("saliva_ids")
+        saliva_ids_str = self.study_metadata.get("saliva_ids")[1:-1]
+        return saliva_ids_str.split(", ")
 
     @property
-    def time_points(self) -> Sequence[int]:
+    def saliva_times(self) -> Sequence[int]:
         """Return saliva sample time points.
 
         Returns
@@ -456,19 +452,8 @@ class ParticipantLogs:
             saliva sample time points in minutes
 
         """
-        return self.study_metadata.get("time_points")
-
-    @property
-    def study_type(self) -> str:
-        """Return study type.
-
-        Returns
-        -------
-        str
-            study type
-
-        """
-        return self.study_metadata.get("study_type")
+        saliva_times_str = self.study_metadata.get("saliva_times").split(",")
+        return list(map(int, saliva_times_str))
 
     @property
     def has_evening_sample(self) -> bool:
@@ -480,7 +465,7 @@ class ParticipantLogs:
             whether the study has an evening saliva sample
 
         """
-        return self.study_metadata.get("has_evening_sample")
+        return self.study_metadata.get("has_evening_salivette")
 
     def data_as_df(self) -> pd.DataFrame:
         """Return log data as dataframe.
@@ -572,6 +557,7 @@ class ParticipantLogs:
 
         """
         data = self.data_as_df()
+        print(data.keys())
         _assert_is_dtype(data.index, pd.DatetimeIndex)
         # split data per day
         date_diff = np.diff(data.index.date)
@@ -580,6 +566,7 @@ class ParticipantLogs:
 
         dict_data = self._split_night(data, idx_date) if split_into_nights else self._split_day(data, idx_date)
 
+        print(dict_data.keys())
         if return_dict:
             return dict_data
 
@@ -684,6 +671,7 @@ class ParticipantLogs:
         data = data.set_index("action", append=True)
         data_filter = data.reindex(action, level="action").reset_index(level="action")
         if rows:
+            #print(data_filter.iloc[rows, :])
             data_filter = data_filter.iloc[rows, :]
         return data_filter
 
@@ -733,7 +721,7 @@ class ParticipantLogs:
             df = pd.DataFrame(list(extras.values))
             df = df[["saliva_id"]]
 
-            if self.study_type == "CAR" and self.has_evening_sample:
+            if self.has_evening_sample:
                 # assign morning or evening "saliva_type" to each saliva_id
                 df = df.assign(
                     timestamp=data_filt.index, sampling_time=data_filt.index.strftime("%H:%M:%S"), saliva_type="morning"
