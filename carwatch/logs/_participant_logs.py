@@ -28,7 +28,17 @@ class ParticipantLogs:
             "version_security_patch",
             "version_release",
         ],
-        "study_metadata": ["study_name", "subject_list", "saliva_times", "study_days", "saliva_ids", "has_evening_salivette", "share_email_address", "check_duplicates", "manual_scan"],
+        "study_metadata": [
+            "study_name",
+            "subject_list",
+            "saliva_times",
+            "study_days",
+            "saliva_ids",
+            "has_evening_salivette",
+            "share_email_address",
+            "check_duplicates",
+            "manual_scan",
+        ],
         "subject_id_set": ["subject_id", "subject_condition"],
         "alarm_set": ["alarm_id", "timestamp", "is_repeating", "is_hidden", "hidden_timestamp"],
         "timer_set": ["alarm_id", "timestamp"],
@@ -440,7 +450,7 @@ class ParticipantLogs:
 
         """
         saliva_ids_str = self.study_metadata.get("saliva_ids")[1:-1]
-        saliva_ids_dict = {idx: saliva_id for idx, saliva_id in enumerate(saliva_ids_str.split(", "))}
+        saliva_ids_dict = dict(enumerate(saliva_ids_str.split(", ")))
         return saliva_ids_dict
 
     @property
@@ -672,7 +682,7 @@ class ParticipantLogs:
         data = data.set_index("action", append=True)
         data_filter = data.reindex(action, level="action").reset_index(level="action")
         if rows:
-            #print(data_filter.iloc[rows, :])
+            # print(data_filter.iloc[rows, :])
             data_filter = data_filter.iloc[rows, :]
         return data_filter
 
