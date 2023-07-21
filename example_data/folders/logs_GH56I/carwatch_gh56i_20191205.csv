@@ -1,6 +1,7 @@
 1575540287285;subject_id_set;{"subject_id":"GH56I","subject_condition":"SPONTANEOUS"}
 1575540287285;app_metadata;{"version_code":10100,"version_name":"1.1.0_20191127_0039-9d94c92"}
 1575540287285;phone_metadata;{"brand":"samsung","manufacturer":"samsung","model":"SM-G930F","version_sdk_level":26,"version_security_patch":"2019-09-01","version_release":"8.0.0"}
+1575539429039;study_metadata;{"study_name":"Test","saliva_times":"0,15,15,15,15","study_days":5,"saliva_ids":"[S1, S2, S3, S4, S5, SA]","has_evening_salivette":true,"share_email_address":"a@b.c","check_duplicates":true,"manual_scan":false}
 1575582070918;evening_salivette;{"id":815}
 1575582073875;barcode_scan_init;{}
 1575582078723;barcode_scanned;{"id":815,"saliva_id":5,"barcode_value":"0720005"}
