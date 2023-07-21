@@ -409,7 +409,6 @@ class TestParticipantLogs:
         file_path = get_correct_zip_file_path("AB12C")
         log_data = ParticipantLogs.from_zip_file(file_path)
         data = log_data.split_sampling_days(split_into_nights=True, return_dict=True)
-        print(data.values())
         _assert_is_dtype(data, dict)
         assert len(data) == 4
         TestCase().assertListEqual(list(data.keys()), ["2019-12-05", "2019-12-07", "2019-12-08", "2019-12-09"])
@@ -560,7 +559,6 @@ class TestParticipantLogs:
     def test_sampling_times_missing_samples(self, include_evening_sample, expected):
         folder_path = get_missing_samples_folder_path("AB12C")
         log_data = ParticipantLogs.from_folder(folder_path)
-        print(log_data)
         sampling_times = log_data.sampling_times(include_evening_sample=include_evening_sample)
 
         _assert_is_dtype(sampling_times, pd.DataFrame)

@@ -568,7 +568,6 @@ class ParticipantLogs:
 
         """
         data = self.data_as_df()
-        print(data.keys())
         _assert_is_dtype(data.index, pd.DatetimeIndex)
         # split data per day
         date_diff = np.diff(data.index.date)
@@ -577,7 +576,6 @@ class ParticipantLogs:
 
         dict_data = self._split_night(data, idx_date) if split_into_nights else self._split_day(data, idx_date)
 
-        print(dict_data.keys())
         if return_dict:
             return dict_data
 
@@ -742,7 +740,6 @@ class ParticipantLogs:
 
             # find the last barcode_scanned event for each saliva_id
             df = df.groupby("saliva_id", sort=False).last()
-            print(df)
             df = df.reset_index().set_index(["saliva_type", "saliva_id"])
             df = df.rename(self.saliva_ids, level="saliva_id")
             data_split[day] = df
