@@ -84,7 +84,7 @@ class QrCodeGenerator:
 
         This method translates the study data into a QR-Code. The information is encoded in the following format:
 
-        ``CARWATCH;N:<study_name>;D:<num_days>;S:<subject_list>;T:<saliva_distances>;
+        ``CARWATCH;N:<study_name>;D:<num_days>;S:<num_subjects>;T:<saliva_distances>;
         E:<has_evening_sample>;M:<contact_email>;F:<check_duplicates>;``
 
         Returns
@@ -96,13 +96,7 @@ class QrCodeGenerator:
         # sanitize inputs to prevent decoding issues
         forbidden = [";", ":", ","]
         study_name = sanitize_str_for_qr(self.study.study_name, forbidden)
-        subject_names = []
-        for name in self.study.subject_names:
-            sanitized_name = sanitize_str_for_qr(name, forbidden)
-            subject_names.append(sanitized_name)
-
         app_id = "CARWATCH"
-        name_string = ",".join(str(dist) for dist in subject_names)
         start_sample = 0 if self.study.start_sample_from_zero else 1
         start_sample = f"{self.study.sample_prefix}{start_sample}"
         distance_string = ",".join(str(dist) for dist in self.saliva_distances)
@@ -112,7 +106,7 @@ class QrCodeGenerator:
             f"{app_id};"
             f"N:{study_name};"
             f"D:{self.study.num_days};"
-            f"S:{name_string};"
+            f"S:{self.study.num_subjects};"
             f"SS:{start_sample};"
             f"T:{distance_string};"
             f"E:{int(self.study.has_evening_sample)};"
