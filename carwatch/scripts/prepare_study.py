@@ -303,7 +303,7 @@ DEFAULT_QR_FILE_SUFFIX = "_qr_code"
     prompt="Output directory for generated files",
     help="Directory where generated files will be stored.",
     envvar="PATHS",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    type=click.Path(file_okay=False, dir_okay=True),
 )
 def run(
     sample_prefix: Optional[str] = None,
