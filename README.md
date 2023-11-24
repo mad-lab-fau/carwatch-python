@@ -1,19 +1,19 @@
-# CARWatch
+# carwatch-python
 
 [![PyPI](https://img.shields.io/pypi/v/carwatch)](https://pypi.org/project/carwatch/)
-![GitHub](https://img.shields.io/github/license/mad-lab-fau/carwatch)
-[![codecov](https://codecov.io/github/mad-lab-fau/carwatch/branch/main/graph/badge.svg?token=WS66IJ41FU)](https://codecov.io/github/mad-lab-fau/carwatch)
-[![Test and Lint](https://github.com/mad-lab-fau/carwatch/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/mad-lab-fau/carwatch/actions/workflows/test-and-lint.yml)
+![GitHub](https://img.shields.io/github/license/mad-lab-fau/carwatch-python)
+[![codecov](https://codecov.io/github/mad-lab-fau/carwatch-python/branch/main/graph/badge.svg?token=WS66IJ41FU)](https://codecov.io/github/mad-lab-fau/carwatch-python)
+[![Test and Lint](https://github.com/mad-lab-fau/carwatch-python/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/mad-lab-fau/carwatch-python/actions/workflows/test-and-lint.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/carwatch)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mad-lab-fau/carwatch)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/carwatch-python)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mad-lab-fau/carwatch-python)
 
 **Get the Android app on the Play Store:**  
 [![Google Play](https://img.shields.io/badge/Google%20Play-CARWatch-3DDC84?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=de.fau.cs.mad.carwatch)
 
 CARWatch is an open-source framework to support **objective** and **low-cost** assessment of cortisol samples in real-world, unsupervised environments. It is especially suitable for **cortisol awakening response (CAR)** research, but not limited to this application.
 
-It consists of an [Android application](https://github.com/mad-lab-fau/carwatch-app) that schedules sampling times and tracks
+It consists of an [Android application](https://github.com/mad-lab-fau/carwatch-android) that schedules sampling times and tracks
 them by scanning a barcode on the respective sampling tube as well as a Python package that provides tools to 
 **configure studies** and **prepare the study materials** and to **process the log data** recorded by the app.
 
@@ -31,7 +31,7 @@ for the following tasks:
 This includes: 
    * Customizing study properties to your needs
    * Setting up your desired sampling schedule
-   * Generating a QR-Code for the [CARWatch app](https://github.com/mad-lab-fau/carwatch-app) to automatically set up 
+   * Generating a QR-Code for the [CARWatch app](https://github.com/mad-lab-fau/carwatch-android) to automatically set up 
    the study in the app
 
 2. **Creating printable labels with barcodes for objective sampling time assessment.**  
@@ -62,8 +62,8 @@ pip install carwatch
 
 Alternatively, you can download the package directly from the source repository on GitHub:
 ```bash
-git clone https://github.com/mad-lab-fau/carwatch.git
-cd carwatch
+git clone https://github.com/mad-lab-fau/carwatch-python.git
+cd carwatch-python
 pip install .
 ```
 
@@ -78,8 +78,8 @@ run the following commands to clone the repository, initialize a virtual environ
 dependencies:
 
 ```bash
-git clone https://github.com/mad-lab-fau/carwatch.git
-cd carwatch
+git clone https://github.com/mad-lab-fau/carwatch-python.git
+cd carwatch-python
 poetry install
 ```
 
@@ -89,7 +89,7 @@ poetry install
 
 The core functionalities of the `carwatch` package are
 
-* creating a QR-Code for configuring the [CARWatch App](https://github.com/mad-lab-fau/carwatch-app) (Preparation),
+* creating a QR-Code for configuring the [CARWatch App](https://github.com/mad-lab-fau/carwatch-android) (Preparation),
 * creating a PDF with printable barcode labels for the saliva sampling tubes (Preparation),
 * and extracting the sampling times for the CARWatch app log recordings (Postprocessing).
 
