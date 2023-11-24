@@ -9,8 +9,8 @@ authors = [
     "Luca Abel <luca.abel@fau.de>"
 ]
 license = "MIT"
-homepage = "https://github.com/mad-lab-fau/carwatch"
-repository = "https://github.com/mad-lab-fau/carwatch"
+homepage = "https://github.com/mad-lab-fau/carwatch-python"
+repository = "https://github.com/mad-lab-fau/carwatch-python"
 readme = "README.md"
 
 [tool.poetry.dependencies]
