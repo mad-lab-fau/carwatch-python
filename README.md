@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/github/mad-lab-fau/carwatch-python/branch/main/graph/badge.svg?token=WS66IJ41FU)](https://codecov.io/github/mad-lab-fau/carwatch-python)
 [![Test and Lint](https://github.com/mad-lab-fau/carwatch-python/actions/workflows/test-and-lint.yml/badge.svg)](https://github.com/mad-lab-fau/carwatch-python/actions/workflows/test-and-lint.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/carwatch-python)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/carwatch)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mad-lab-fau/carwatch-python)
 
 **Get the Android app on the Play Store:**  
