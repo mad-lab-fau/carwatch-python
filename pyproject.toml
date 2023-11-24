@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "carwatch"
-version = "0.3.0"
+version = "0.3.1"
 description = "A Python package for the CARWatch framework to improve cortisol awakening response sampling."
 authors = [
     "Annika Muecke <annika.muecke@fau.de>",
